@@ -28,7 +28,8 @@ public class LoginServlet extends HttpServlet {
             } else {
                 resp.getWriter().write("Login failed");
             }
-
+            System.out.println("username=" + username);
+            System.out.println("password=" + password);
         } catch (Exception e) {
             e.printStackTrace();
         }

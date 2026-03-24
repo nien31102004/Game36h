@@ -13,7 +13,7 @@ public class UserService {
         if (user != null && user.getPassword().equals(password)) {
             return user;
         }
-
+        System.out.println("user from DB: " + user);
         return null;
     }
 }
