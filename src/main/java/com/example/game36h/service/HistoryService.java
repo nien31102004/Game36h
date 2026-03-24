@@ -37,4 +37,15 @@ public class HistoryService {
     public Page<History> getUserHistory(Long userId, Pageable pageable) {
         return historyRepository.findByUserIdOrderByPlayedAtDesc(userId, pageable);
     }
+
+    public History getHistoryById(Long id) {
+        return historyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("History not found with id: " + id));
+    }
+
+    public void deleteHistoryById(Long id) {
+        History history = historyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("History not found with id: " + id));
+        historyRepository.delete(history);
+    }
 }

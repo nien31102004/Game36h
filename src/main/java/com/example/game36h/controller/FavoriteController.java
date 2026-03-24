@@ -58,6 +58,18 @@ public class FavoriteController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/by-id/{id}")
+    public ResponseEntity<Favorite> getFavoriteById(@PathVariable Long id) {
+        Favorite favorite = favoriteService.getFavoriteById(id);
+        return ResponseEntity.ok(favorite);
+    }
+
+    @DeleteMapping("/by-id/{id}")
+    public ResponseEntity<Void> deleteFavoriteById(@PathVariable Long id) {
+        favoriteService.deleteFavoriteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
     private Long getUserIdFromUserDetails(UserDetails userDetails) {
         return 1L; // Placeholder - implement proper user ID extraction
     }

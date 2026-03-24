@@ -24,11 +24,11 @@ public class GameController {
 
     @GetMapping
     public ResponseEntity<Page<GameResponse>> getGames(
-            @RequestParam(required = false) String keyword,
+            @RequestParam(name = "q", required = false) String keyword,
             @RequestParam(required = false) Long category,
             @RequestParam(required = false) String sort,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "limit", defaultValue = "10") int size) {
 
         Sort.Direction direction = "desc".equalsIgnoreCase(sort) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sortBy = Sort.by(direction, "createdAt");
@@ -100,6 +100,29 @@ public class GameController {
         Long userId = getUserIdFromUserDetails(userDetails);
         Pageable pageable = PageRequest.of(page, size);
         Page<GameResponse> games = gameService.getRecommendedGames(userId, pageable);
+        return ResponseEntity.ok(games);
+    }
+
+    @GetMapping("/my-games")
+    public ResponseEntity<Page<GameResponse>> getMyGames(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        Long userId = getUserIdFromUserDetails(userDetails);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<GameResponse> games = gameService.getGamesByUserId(userId, pageable);
+        return ResponseEntity.ok(games);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<GameResponse>> getGamesByUserId(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<GameResponse> games = gameService.getGamesByUserId(userId, pageable);
         return ResponseEntity.ok(games);
     }
 

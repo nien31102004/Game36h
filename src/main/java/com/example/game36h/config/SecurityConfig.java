@@ -61,6 +61,7 @@ package com.example.game36h.config;
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/api/games/**").permitAll()
+                    .requestMatchers("/api/categories/**").permitAll()
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
                 )

@@ -41,6 +41,18 @@ public class HistoryController {
         return ResponseEntity.ok(history);
     }
 
+    @GetMapping("/by-id/{id}")
+    public ResponseEntity<History> getHistoryById(@PathVariable Long id) {
+        History history = historyService.getHistoryById(id);
+        return ResponseEntity.ok(history);
+    }
+
+    @DeleteMapping("/by-id/{id}")
+    public ResponseEntity<Void> deleteHistoryById(@PathVariable Long id) {
+        historyService.deleteHistoryById(id);
+        return ResponseEntity.noContent().build();
+    }
+
     private Long getUserIdFromUserDetails(UserDetails userDetails) {
         return 1L; // Placeholder - implement proper user ID extraction
     }

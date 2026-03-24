@@ -111,6 +111,11 @@ public class GameService {
                 .map(this::convertToGameResponse);
     }
 
+    public Page<GameResponse> getGamesByUserId(Long userId, Pageable pageable) {
+        return gameRepository.findByUserId(userId, pageable)
+                .map(this::convertToGameResponse);
+    }
+
     private GameResponse convertToGameResponse(Game game) {
         GameResponse response = new GameResponse();
         response.setId(game.getId());

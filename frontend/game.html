@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết Game - Y8.COM</title>
+    <title>Chi tiết Game - Game36h</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="game-detail.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -14,9 +14,9 @@
         <div class="header-container">
             <div class="logo">
                 <a href="index.html">
-                    <span class="logo-y">Y</span>
-                    <span class="logo-8">8</span>
-                    <span class="logo-com">.COM</span>
+                    <span class="logo-y">Game</span>
+                    <span class="logo-8">36</span>
+                    <span class="logo-com">h</span>
                 </a>
             </div>
             <div class="search-box">
@@ -75,7 +75,7 @@
                     <button class="control-btn share">
                         <span>🔗</span> Chia sẻ
                     </button>
-                    <button class="control-btn fullscreen">
+                    <button class="control-btn fullscreen" id="fullscreenBtn" onclick="toggleFullscreen()">
                         <span>⛶</span> Toàn màn hình
                     </button>
                 </div>
@@ -240,59 +240,8 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
-            <div class="footer-top">
-                <div class="footer-logo">
-                    <span class="logo-y">Y</span>
-                    <span class="logo-8">8</span>
-                    <span class="logo-com">.COM</span>
-                </div>
-                <div class="footer-social">
-                    <a href="#" class="social-link">Facebook</a>
-                    <a href="#" class="social-link">Twitter</a>
-                    <a href="#" class="social-link">YouTube</a>
-                    <a href="#" class="social-link">Discord</a>
-                </div>
-            </div>
-            <div class="footer-links">
-                <div class="footer-column">
-                    <h4>Game</h4>
-                    <ul>
-                        <li><a href="#">Game Mới</a></li>
-                        <li><a href="#">Game Hay Nhất</a></li>
-                        <li><a href="#">Game Hot</a></li>
-                        <li><a href="#">Yêu Thích</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4>Thể Loại</h4>
-                    <ul>
-                        <li><a href="#">Hành Động</a></li>
-                        <li><a href="#">Phiêu Lưu</a></li>
-                        <li><a href="#">Chiến Thuật</a></li>
-                        <li><a href="#">Giải Đố</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4>Hỗ Trợ</h4>
-                    <ul>
-                        <li><a href="#">Trung Tâm Trợ Giúp</a></li>
-                        <li><a href="#">Liên Hệ</a></li>
-                        <li><a href="#">Báo Lỗi</a></li>
-                        <li><a href="#">Yêu Cầu Game</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4>Pháp Lý</h4>
-                    <ul>
-                        <li><a href="#">Điều Khoản</a></li>
-                        <li><a href="#">Chính Sách</a></li>
-                        <li><a href="#">Bản Quyền</a></li>
-                        <li><a href="#">Cookie</a></li>
-                    </ul>
-                </div>
-            </div>
             <div class="footer-bottom">
-                <p>© 2024 Y8.COM - Tất cả các quyền được bảo lưu. Chơi game trực tuyến miễn phí!</p>
+                <p>© 2024 Y8.COM - Chơi game trực tuyến miễn phí!</p>
             </div>
         </div>
     </footer>
@@ -300,6 +249,27 @@
     <script src="api.js"></script>
     <script src="main.js"></script>
     <script>
+        // ================= AUTH UI =================
+        document.addEventListener('DOMContentLoaded', () => {
+            updateHeaderActions();
+        });
+
+        function updateHeaderActions() {
+            const headerActions = document.querySelector('.header-actions');
+            if (!headerActions) return;
+
+            if (API.Auth.isLoggedIn()) {
+                const user = API.Auth.getCurrentUser();
+                headerActions.innerHTML = `
+                    <a href="profile.html" class="user-avatar-link">
+                        <img src="${user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (user?.username || 'User')}" alt="Avatar" class="header-avatar">
+                    </a>
+                    <span class="username">${user?.username || 'User'}</span>
+                    <button class="btn-register" onclick="API.Auth.logout()">Đăng xuất</button>
+                `;
+            }
+        }
+
         // Star rating
         const stars = document.querySelectorAll('.star');
         stars.forEach(star => {
@@ -340,6 +310,44 @@
                 window.submitComment(gameId);
             }
         }
+
+        // Fullscreen toggle
+        function toggleFullscreen() {
+            const gameFrame = document.querySelector('.game-frame');
+            const btn = document.getElementById('fullscreenBtn');
+            
+            if (!document.fullscreenElement) {
+                if (gameFrame.requestFullscreen) {
+                    gameFrame.requestFullscreen();
+                } else if (gameFrame.webkitRequestFullscreen) {
+                    gameFrame.webkitRequestFullscreen();
+                } else if (gameFrame.msRequestFullscreen) {
+                    gameFrame.msRequestFullscreen();
+                }
+                btn.innerHTML = '<span>⛶</span> Thoát toàn màn hình';
+                gameFrame.classList.add('fullscreen-active');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                btn.innerHTML = '<span>⛶</span> Toàn màn hình';
+                gameFrame.classList.remove('fullscreen-active');
+            }
+        }
+
+        // Listen for fullscreen change
+        document.addEventListener('fullscreenchange', () => {
+            const gameFrame = document.querySelector('.game-frame');
+            const btn = document.getElementById('fullscreenBtn');
+            if (!document.fullscreenElement) {
+                btn.innerHTML = '<span>⛶</span> Toàn màn hình';
+                gameFrame.classList.remove('fullscreen-active');
+            }
+        });
     </script>
 </body>
 </html>

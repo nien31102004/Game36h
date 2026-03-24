@@ -108,12 +108,17 @@ const GamesAPI = {
 
     // Lấy game theo category
     async getGamesByCategory(categoryId) {
-        return apiCall(`/games/category/${categoryId}`);
+        return apiCall(`/games?category=${categoryId}`);
     },
 
     // Tìm kiếm game
-    async searchGames(query) {
-        return apiCall(`/games/search?q=${encodeURIComponent(query)}`);
+    async searchGames(query, category = null, sort = null, page = 1, limit = 12) {
+        const params = { q: query };
+        if (category) params.category = category;
+        if (sort) params.sort = sort;
+        params.page = page - 1; // Spring page starts at 0
+        params.limit = limit;
+        return this.getGames(params);
     },
 
     // Lấy game mới nhất
@@ -268,6 +273,61 @@ const CategoriesAPI = {
     }
 };
 
+// ==================== USER GAMES API (Game Management) ====================
+
+const UserGamesAPI = {
+    // Lấy danh sách game của user hiện tại
+    async getMyGames() {
+        const token = AuthAPI.getToken();
+        return apiCall('/games/user/6', 'GET', null, token);
+    },
+
+    // Upload game mới
+    async uploadGame(gameData) {
+        // gameData: { title, description, category_id, game_url, thumbnail }
+        const token = AuthAPI.getToken();
+        return apiCall('/games', 'POST', gameData, token);
+    },
+
+    // Upload file game (multipart/form-data)
+    async uploadGameFile(formData) {
+        const token = AuthAPI.getToken();
+        const url = `${API_BASE_URL}/games/upload`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+        
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.message || 'Upload failed');
+        }
+        return result;
+    },
+
+    // Cập nhật thông tin game
+    async updateGame(gameId, gameData) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/games/${gameId}`, 'PUT', gameData, token);
+    },
+
+    // Xóa game
+    async deleteGame(gameId) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/games/${gameId}`, 'DELETE', null, token);
+    },
+
+    // Đổi trạng thái game (active/inactive)
+    async toggleGameStatus(gameId, isActive) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/games/${gameId}/status`, 'PUT', { is_active: isActive }, token);
+    }
+};
+
 // ==================== NOTIFICATIONS API ====================
 
 const NotificationsAPI = {
@@ -306,5 +366,6 @@ window.API = {
     History: HistoryAPI,
     Categories: CategoriesAPI,
     Notifications: NotificationsAPI,
+    UserGames: UserGamesAPI,
     baseUrl: API_BASE_URL
 };

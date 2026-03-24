@@ -48,7 +48,14 @@ public class FavoriteService {
         return favoriteRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
     }
 
-    public boolean isGameFavorited(Long gameId, Long userId) {
-        return favoriteRepository.existsByUserIdAndGameId(userId, gameId);
+    public Favorite getFavoriteById(Long id) {
+        return favoriteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Favorite not found with id: " + id));
+    }
+
+    public void deleteFavoriteById(Long id) {
+        Favorite favorite = favoriteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Favorite not found with id: " + id));
+        favoriteRepository.delete(favorite);
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ sơ của tôi - Y8.COM</title>
+    <title>Hồ sơ của tôi - Game36h</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="profile.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -14,38 +14,35 @@
         <div class="header-container">
             <div class="logo">
                 <a href="index.html">
-                    <span class="logo-y">Y</span>
-                    <span class="logo-8">8</span>
-                    <span class="logo-com">.COM</span>
+                    <span class="logo-y">Game</span>
+                    <span class="logo-8">36</span>
+                    <span class="logo-com">h</span>
                 </a>
             </div>
             <div class="search-box">
-                <input type="text" placeholder="Tìm kiếm game...">
-                <button class="search-btn">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm game...">
+                <button class="search-btn" onclick="searchGames()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"></circle>
                         <path d="m21 21-4.35-4.35"></path>
                     </svg>
                 </button>
             </div>
-            <div class="header-actions logged-in">
-                <a href="profile.html" class="user-avatar-link active">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User123" alt="Avatar" class="header-avatar">
-                </a>
-                <div class="user-dropdown">
-                    <span class="username">GameMaster</span>
-                    <div class="dropdown-menu">
-                        <a href="profile.html">Hồ sơ</a>
-                        <a href="#">Game yêu thích</a>
-                        <a href="#">Lịch sử</a>
-                        <a href="#">Cài đặt</a>
-                        <hr>
-                        <a href="index.html" class="logout">Đăng xuất</a>
-                    </div>
-                </div>
+            <div class="header-actions">
+                <a href="login.html" class="btn-login">Đăng nhập</a>
+                <a href="register.html" class="btn-register">Đăng ký</a>
             </div>
         </div>
     </header>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <ul class="nav-menu">
+                <li><a href="index.html">Trang chủ</a></li>
+            </ul>
+        </div>
+    </nav>
 
 
 
@@ -62,21 +59,21 @@
                     <div class="profile-info">
                         <h1 class="profile-name">GameMaster</h1>
                         <p class="profile-email">gamemaster@email.com</p>
-                        <span class="profile-role">Thành viên</span>
-                        <p class="profile-joined">Tham gia: Tháng 3, 2024</p>
+                        <span class="profile-role" id="profileRole">Thành viên</span>
+                        <p class="profile-joined" id="profileJoined">Tham gia: --</p>
                     </div>
                 </div>
                 <div class="profile-stats">
                     <div class="profile-stat">
-                        <span class="stat-number">156</span>
+                        <span class="stat-number" id="statGames">0</span>
                         <span class="stat-label">Game đã chơi</span>
                     </div>
                     <div class="profile-stat">
-                        <span class="stat-number">42</span>
+                        <span class="stat-number" id="statFavorites">0</span>
                         <span class="stat-label">Yêu thích</span>
                     </div>
                     <div class="profile-stat">
-                        <span class="stat-number">89</span>
+                        <span class="stat-number" id="statComments">0</span>
                         <span class="stat-label">Bình luận</span>
                     </div>
                 </div>
@@ -94,172 +91,51 @@
             <div class="tab-content">
                 <!-- Favorites Tab -->
                 <div id="favorites" class="tab-panel active">
-                    <h2>Game yêu thích (42)</h2>
-                    <div class="games-grid">
-                        <div class="game-card">
-                            <div class="game-thumb">
-                                <div class="game-thumb-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                                <div class="game-overlay">
-                                    <button class="play-btn">Chơi ngay</button>
-                                </div>
-                                <button class="remove-favorite" title="Xóa khỏi yêu thích">❤️</button>
-                            </div>
-                            <div class="game-info">
-                                <h3 class="game-title">Fireboy and Watergirl</h3>
-                                <div class="game-meta">
-                                    <span class="rating">⭐ 4.8</span>
-                                    <span class="plays">👁 5.2M</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="game-card">
-                            <div class="game-thumb">
-                                <div class="game-thumb-placeholder" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
-                                <div class="game-overlay">
-                                    <button class="play-btn">Chơi ngay</button>
-                                </div>
-                                <button class="remove-favorite" title="Xóa khỏi yêu thích">❤️</button>
-                            </div>
-                            <div class="game-info">
-                                <h3 class="game-title">Slope Game</h3>
-                                <div class="game-meta">
-                                    <span class="rating">⭐ 4.7</span>
-                                    <span class="plays">👁 8.1M</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="game-card">
-                            <div class="game-thumb">
-                                <div class="game-thumb-placeholder" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
-                                <div class="game-overlay">
-                                    <button class="play-btn">Chơi ngay</button>
-                                </div>
-                                <button class="remove-favorite" title="Xóa khỏi yêu thích">❤️</button>
-                            </div>
-                            <div class="game-info">
-                                <h3 class="game-title">Subway Surfers</h3>
-                                <div class="game-meta">
-                                    <span class="rating">⭐ 4.6</span>
-                                    <span class="plays">👁 12M</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="game-card">
-                            <div class="game-thumb">
-                                <div class="game-thumb-placeholder" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
-                                <div class="game-overlay">
-                                    <button class="play-btn">Chơi ngay</button>
-                                </div>
-                                <button class="remove-favorite" title="Xóa khỏi yêu thích">❤️</button>
-                            </div>
-                            <div class="game-info">
-                                <h3 class="game-title">Temple Run 2</h3>
-                                <div class="game-meta">
-                                    <span class="rating">⭐ 4.5</span>
-                                    <span class="plays">👁 9.8M</span>
-                                </div>
-                            </div>
-                        </div>
+                    <h2>Game yêu thích (<span id="favoritesCount">0</span>)</h2>
+                    <div class="games-grid" id="favoritesGrid">
+                        <div class="loading">Đang tải...</div>
                     </div>
                 </div>
 
                 <!-- History Tab -->
                 <div id="history" class="tab-panel">
                     <h2>Lịch sử chơi game</h2>
-                    <div class="history-list">
-                        <div class="history-item">
-                            <div class="history-thumb">
-                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                            </div>
-                            <div class="history-info">
-                                <h4>Fireboy and Watergirl</h4>
-                                <p>Chơi lần cuối: Hôm nay, 14:30</p>
-                            </div>
-                            <button class="btn-play-again">Chơi lại</button>
-                        </div>
-                        <div class="history-item">
-                            <div class="history-thumb">
-                                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
-                            </div>
-                            <div class="history-info">
-                                <h4>Slope Game</h4>
-                                <p>Chơi lần cuối: Hôm qua, 20:15</p>
-                            </div>
-                            <button class="btn-play-again">Chơi lại</button>
-                        </div>
-                        <div class="history-item">
-                            <div class="history-thumb">
-                                <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"></div>
-                            </div>
-                            <div class="history-info">
-                                <h4>Papa's Pizzeria</h4>
-                                <p>Chơi lần cuối: 3 ngày trước</p>
-                            </div>
-                            <button class="btn-play-again">Chơi lại</button>
-                        </div>
+                    <div class="history-list" id="historyList">
+                        <div class="loading">Đang tải...</div>
                     </div>
                 </div>
 
                 <!-- Ratings Tab -->
                 <div id="ratings" class="tab-panel">
-                    <h2>Đánh giá của tôi (89)</h2>
-                    <div class="ratings-list">
-                        <div class="rating-item">
-                            <div class="rating-game">
-                                <div class="rating-thumb">
-                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                                </div>
-                                <span>Fireboy and Watergirl</span>
-                            </div>
-                            <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                            <span class="rating-date">2 ngày trước</span>
-                        </div>
-                        <div class="rating-item">
-                            <div class="rating-game">
-                                <div class="rating-thumb">
-                                    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
-                                </div>
-                                <span>Slope Game</span>
-                            </div>
-                            <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                            <span class="rating-date">1 tuần trước</span>
-                        </div>
-                        <div class="rating-item">
-                            <div class="rating-game">
-                                <div class="rating-thumb">
-                                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
-                                </div>
-                                <span>Subway Surfers</span>
-                            </div>
-                            <div class="rating-stars">⭐⭐⭐⭐</div>
-                            <span class="rating-date">2 tuần trước</span>
-                        </div>
+                    <h2>Đánh giá của tôi (<span id="ratingsCount">0</span>)</h2>
+                    <div class="ratings-list" id="ratingsList">
+                        <div class="loading">Đang tải...</div>
                     </div>
                 </div>
 
                 <!-- Settings Tab -->
                 <div id="settings" class="tab-panel">
                     <h2>Cài đặt tài khoản</h2>
-                    <form class="settings-form">
+                    <form class="settings-form" id="settingsForm">
                         <div class="form-group">
                             <label>Tên đăng nhập</label>
-                            <input type="text" value="GameMaster" disabled>
+                            <input type="text" id="settingsUsername" disabled>
                         </div>
                         <div class="form-group">
                             <label>Email</label>
-                            <input type="email" value="gamemaster@email.com">
+                            <input type="email" id="settingsEmail">
                         </div>
                         <div class="form-group">
                             <label>Mật khẩu hiện tại</label>
-                            <input type="password" placeholder="Nhập mật khẩu hiện tại">
+                            <input type="password" id="currentPassword" placeholder="Nhập mật khẩu hiện tại">
                         </div>
                         <div class="form-group">
                             <label>Mật khẩu mới</label>
-                            <input type="password" placeholder="Nhập mật khẩu mới">
+                            <input type="password" id="newPassword" placeholder="Nhập mật khẩu mới">
                         </div>
                         <div class="form-group">
                             <label>Xác nhận mật khẩu mới</label>
-                            <input type="password" placeholder="Nhập lại mật khẩu mới">
+                            <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu mới">
                         </div>
                         <button type="submit" class="btn-save">Lưu thay đổi</button>
                     </form>
@@ -271,59 +147,8 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
-            <div class="footer-top">
-                <div class="footer-logo">
-                    <span class="logo-y">Y</span>
-                    <span class="logo-8">8</span>
-                    <span class="logo-com">.COM</span>
-                </div>
-                <div class="footer-social">
-                    <a href="#" class="social-link">Facebook</a>
-                    <a href="#" class="social-link">Twitter</a>
-                    <a href="#" class="social-link">YouTube</a>
-                    <a href="#" class="social-link">Discord</a>
-                </div>
-            </div>
-            <div class="footer-links">
-                <div class="footer-column">
-                    <h4>Game</h4>
-                    <ul>
-                        <li><a href="#">Game Mới</a></li>
-                        <li><a href="#">Game Hay Nhất</a></li>
-                        <li><a href="#">Game Hot</a></li>
-                        <li><a href="#">Yêu Thích</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4>Thể Loại</h4>
-                    <ul>
-                        <li><a href="#">Hành Động</a></li>
-                        <li><a href="#">Phiêu Lưu</a></li>
-                        <li><a href="#">Chiến Thuật</a></li>
-                        <li><a href="#">Giải Đố</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4>Hỗ Trợ</h4>
-                    <ul>
-                        <li><a href="#">Trung Tâm Trợ Giúp</a></li>
-                        <li><a href="#">Liên Hệ</a></li>
-                        <li><a href="#">Báo Lỗi</a></li>
-                        <li><a href="#">Yêu Cầu Game</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4>Pháp Lý</h4>
-                    <ul>
-                        <li><a href="#">Điều Khoản</a></li>
-                        <li><a href="#">Chính Sách</a></li>
-                        <li><a href="#">Bản Quyền</a></li>
-                        <li><a href="#">Cookie</a></li>
-                    </ul>
-                </div>
-            </div>
             <div class="footer-bottom">
-                <p>© 2024 Y8.COM - Tất cả các quyền được bảo lưu. Chơi game trực tuyến miễn phí!</p>
+                <p>© 2024 Y8.COM - Chơi game trực tuyến miễn phí!</p>
             </div>
         </div>
     </footer>
@@ -331,6 +156,262 @@
     <script src="api.js"></script>
     <script src="main.js"></script>
     <script>
+        // ================= AUTH & UI =================
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!API.Auth.isLoggedIn()) {
+                window.location.href = 'login.html?redirect=profile.html';
+                return;
+            }
+            updateHeaderActions();
+            loadUserProfile();
+            loadUserStats();
+            loadFavorites();
+            loadHistory();
+            loadRatings();
+            initSettingsForm();
+        });
+
+        function updateHeaderActions() {
+            const headerActions = document.querySelector('.header-actions');
+            if (!headerActions) return;
+
+            if (API.Auth.isLoggedIn()) {
+                const user = API.Auth.getCurrentUser();
+                headerActions.innerHTML = `
+                    <a href="profile.html" class="user-avatar-link">
+                        <img src="${user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (user?.username || 'User')}" alt="Avatar" class="header-avatar">
+                    </a>
+                    <span class="username">${user?.username || 'User'}</span>
+                    <button class="btn-register" onclick="API.Auth.logout()">Đăng xuất</button>
+                `;
+            }
+        }
+
+        function searchGames() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (keyword) {
+                window.location.href = `search.html?q=${encodeURIComponent(keyword)}`;
+            }
+        }
+
+        document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchGames();
+        });
+
+        function loadUserProfile() {
+            const user = API.Auth.getCurrentUser();
+            if (user) {
+                document.querySelector('.profile-name').textContent = user.username || 'User';
+                document.querySelector('.profile-email').textContent = user.email || '';
+                document.querySelector('.profile-avatar img').src = user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username || 'User'}`;
+                document.getElementById('profileRole').textContent = user.role || 'Thành viên';
+                
+                const joinedDate = user.created_at ? new Date(user.created_at).toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' }) : '--';
+                document.getElementById('profileJoined').textContent = `Tham gia: ${joinedDate}`;
+                
+                // Pre-fill settings form
+                document.getElementById('settingsUsername').value = user.username || '';
+                document.getElementById('settingsEmail').value = user.email || '';
+            }
+        }
+
+        async function loadUserStats() {
+            try {
+                const [favoritesRes, historyRes, commentsRes] = await Promise.all([
+                    API.Favorites.getFavorites().catch(() => ({ data: [] })),
+                    API.History.getHistory().catch(() => ({ data: [] })),
+                    API.Comments.getMyComments().catch(() => ({ data: [] }))
+                ]);
+                
+                const favorites = favoritesRes.data || favoritesRes || [];
+                const history = historyRes.data || historyRes || [];
+                const comments = commentsRes.data || commentsRes || [];
+                
+                document.getElementById('statFavorites').textContent = favorites.length || 0;
+                document.getElementById('statGames').textContent = history.length || 0;
+                document.getElementById('statComments').textContent = comments.length || 0;
+            } catch (err) {
+                console.error('Error loading stats:', err);
+            }
+        }
+
+        async function loadFavorites() {
+            const grid = document.getElementById('favoritesGrid');
+            try {
+                const result = await API.Favorites.getFavorites();
+                const favorites = result.data || result || [];
+                
+                document.getElementById('favoritesCount').textContent = favorites.length;
+                
+                if (favorites.length === 0) {
+                    grid.innerHTML = '<div class="empty-state">Chưa có game yêu thích nào</div>';
+                    return;
+                }
+                
+                grid.innerHTML = favorites.map(fav => {
+                    const game = fav.game || fav;
+                    const gradient = getGradientForGame(game.id || game.game_id);
+                    return `
+                        <div class="game-card" data-game-id="${game.id || game.game_id}">
+                            <div class="game-thumb">
+                                <div class="game-thumb-placeholder" style="background: ${gradient};"></div>
+                                <div class="game-overlay">
+                                    <a href="game.html?id=${game.id || game.game_id}" class="play-btn">Chơi ngay</a>
+                                </div>
+                                <button class="remove-favorite" title="Xóa khỏi yêu thích" onclick="removeFavorite('${game.id || game.game_id}', this)">❤️</button>
+                            </div>
+                            <div class="game-info">
+                                <h3 class="game-title">${game.title || 'Game'}</h3>
+                                <div class="game-meta">
+                                    <span class="rating">⭐ ${game.rating || '0'}</span>
+                                    <span class="plays">👁 ${formatNumber(game.views || 0)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Error loading favorites:', err);
+                grid.innerHTML = '<div class="error">Không thể tải danh sách yêu thích</div>';
+            }
+        }
+
+        async function loadHistory() {
+            const list = document.getElementById('historyList');
+            try {
+                const result = await API.History.getHistory();
+                const history = result.data || result || [];
+                
+                if (history.length === 0) {
+                    list.innerHTML = '<div class="empty-state">Chưa có lịch sử chơi game</div>';
+                    return;
+                }
+                
+                list.innerHTML = history.map(item => {
+                    const game = item.game || item;
+                    const gradient = getGradientForGame(game.id || game.game_id);
+                    const playedAt = item.played_at ? formatTimeAgo(new Date(item.played_at)) : '';
+                    return `
+                        <div class="history-item" data-history-id="${item.id}">
+                            <div class="history-thumb">
+                                <div style="background: ${gradient};"></div>
+                            </div>
+                            <div class="history-info">
+                                <h4>${game.title || 'Game'}</h4>
+                                <p>Chơi lần cuối: ${playedAt}</p>
+                            </div>
+                            <a href="game.html?id=${game.id || game.game_id}" class="btn-play-again">Chơi lại</a>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Error loading history:', err);
+                list.innerHTML = '<div class="error">Không thể tải lịch sử</div>';
+            }
+        }
+
+        async function loadRatings() {
+            const list = document.getElementById('ratingsList');
+            try {
+                const result = await API.Ratings.getMyRatings();
+                const ratings = result.data || result || [];
+                
+                document.getElementById('ratingsCount').textContent = ratings.length;
+                
+                if (ratings.length === 0) {
+                    list.innerHTML = '<div class="empty-state">Chưa có đánh giá nào</div>';
+                    return;
+                }
+                
+                list.innerHTML = ratings.map(rating => {
+                    const game = rating.game || {};
+                    const gradient = getGradientForGame(game.id || rating.game_id);
+                    const stars = '⭐'.repeat(rating.score || 0);
+                    const ratedAt = rating.created_at ? formatTimeAgo(new Date(rating.created_at)) : '';
+                    return `
+                        <div class="rating-item">
+                            <div class="rating-game">
+                                <div class="rating-thumb">
+                                    <div style="background: ${gradient};"></div>
+                                </div>
+                                <span>${game.title || 'Game'}</span>
+                            </div>
+                            <div class="rating-stars">${stars}</div>
+                            <span class="rating-date">${ratedAt}</span>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Error loading ratings:', err);
+                list.innerHTML = '<div class="error">Không thể tải đánh giá</div>';
+            }
+        }
+
+        async function removeFavorite(gameId, btn) {
+            if (!confirm('Xóa game này khỏi danh sách yêu thích?')) return;
+            try {
+                await API.Favorites.removeFavorite(gameId);
+                const gameCard = btn.closest('.game-card');
+                gameCard.remove();
+                
+                // Update count
+                const currentCount = parseInt(document.getElementById('favoritesCount').textContent);
+                document.getElementById('favoritesCount').textContent = Math.max(0, currentCount - 1);
+                document.getElementById('statFavorites').textContent = Math.max(0, currentCount - 1);
+                
+                // Check if empty
+                const grid = document.getElementById('favoritesGrid');
+                if (grid.children.length === 0) {
+                    grid.innerHTML = '<div class="empty-state">Chưa có game yêu thích nào</div>';
+                }
+            } catch (err) {
+                console.error('Error removing favorite:', err);
+                alert('Không thể xóa khỏi yêu thích');
+            }
+        }
+
+        function initSettingsForm() {
+            const form = document.getElementById('settingsForm');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('settingsEmail').value;
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                try {
+                    // Update email if changed
+                    const user = API.Auth.getCurrentUser();
+                    if (email && email !== user.email) {
+                        await API.Auth.updateProfile({ email });
+                    }
+                    
+                    // Change password if provided
+                    if (newPassword) {
+                        if (newPassword !== confirmPassword) {
+                            alert('Mật khẩu mới không khớp');
+                            return;
+                        }
+                        if (!currentPassword) {
+                            alert('Vui lòng nhập mật khẩu hiện tại');
+                            return;
+                        }
+                        await API.Auth.changePassword({ currentPassword, newPassword });
+                    }
+                    
+                    alert('Cập nhật thành công!');
+                    // Clear password fields
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } catch (err) {
+                    console.error('Error updating settings:', err);
+                    alert('Cập nhật thất bại: ' + (err.message || 'Lỗi không xác định'));
+                }
+            });
+        }
+
         // Tab switching
         const tabBtns = document.querySelectorAll('.tab-btn');
         const tabPanels = document.querySelectorAll('.tab-panel');
@@ -347,19 +428,36 @@
             });
         });
 
-        // Remove favorite
-        document.querySelectorAll('.remove-favorite').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const gameCard = btn.closest('.game-card');
-                const gameId = gameCard.dataset.gameId;
-                if (confirm('Xóa game này khỏi danh sách yêu thích?')) {
-                    window.API.Favorites.removeFavorite(gameId).then(() => {
-                        gameCard.remove();
-                    }).catch(err => console.error('Error:', err));
-                }
-            });
-        });
+        // Helper functions
+        function getGradientForGame(id) {
+            const gradients = [
+                'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+            ];
+            return gradients[(id || 0) % gradients.length];
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num;
+        }
+
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+            
+            if (diff < 60) return 'Vừa xong';
+            if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+            if (diff < 604800) return `${Math.floor(diff / 86400)} ngày trước`;
+            if (diff < 2592000) return `${Math.floor(diff / 604800)} tuần trước`;
+            return date.toLocaleDateString('vi-VN');
+        }
     </script>
 </body>
 </html>
