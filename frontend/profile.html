@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ của tôi - Y8.COM</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="profile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html">
+                    <span class="logo-y">Y</span>
+                    <span class="logo-8">8</span>
+                    <span class="logo-com">.COM</span>
+                </a>
+            </div>
+            <div class="search-box">
+                <input type="text" placeholder="Tìm kiếm game...">
+                <button class="search-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="header-actions logged-in">
+                <a href="profile.html" class="user-avatar-link active">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User123" alt="Avatar" class="header-avatar">
+                </a>
+                <div class="user-dropdown">
+                    <span class="username">GameMaster</span>
+                    <div class="dropdown-menu">
+                        <a href="profile.html">Hồ sơ</a>
+                        <a href="#">Game yêu thích</a>
+                        <a href="#">Lịch sử</a>
+                        <a href="#">Cài đặt</a>
+                        <hr>
+                        <a href="index.html" class="logout">Đăng xuất</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+
+    <!-- Profile Content -->
+    <main class="main-content">
+        <div class="profile-container">
+            <!-- Profile Header -->
+            <section class="profile-header">
+                <div class="profile-avatar-section">
+                    <div class="profile-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User123" alt="Profile Avatar">
+                        <button class="change-avatar-btn">📷</button>
+                    </div>
+                    <div class="profile-info">
+                        <h1 class="profile-name">GameMaster</h1>
+                        <p class="profile-email">gamemaster@email.com</p>
+                        <span class="profile-role">Thành viên</span>
+                        <p class="profile-joined">Tham gia: Tháng 3, 2024</p>
+                    </div>
+                </div>
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <span class="stat-number">156</span>
+                        <span class="stat-label">Game đã chơi</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-number">42</span>
+                        <span class="stat-label">Yêu thích</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-number">89</span>
+                        <span class="stat-label">Bình luận</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Tabs -->
+            <div class="profile-tabs">
+                <button class="tab-btn active" data-tab="favorites">⭐ Yêu thích</button>
+                <button class="tab-btn" data-tab="history">🕐 Lịch sử</button>
+                <button class="tab-btn" data-tab="ratings">⭐ Đánh giá</button>
+                <button class="tab-btn" data-tab="settings">⚙️ Cài đặt</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Favorites Tab -->
+                <div id="favorites" class="tab-panel active">
+                    <h2>Game yêu thích (42)</h2>
+                    <div class="games-grid">
+                        <div class="game-card">
+                            <div class="game-thumb">
+                                <div class="game-thumb-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                                <div class="game-overlay">
+                                    <button class="play-btn">Chơi ngay</button>
+                                </div>
+                                <button class="remove-favorite" title="Xóa khỏi yêu thích">❤️</button>
+                            </div>
+                            <div class="game-info">
+                                <h3 class="game-title">Fireboy and Watergirl</h3>
+                                <div class="game-meta">
+                                    <span class="rating">⭐ 4.8</span>
+                                    <span class="plays">👁 5.2M</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="game-card">
+                            <div class="game-thumb">
+                                <div class="game-thumb-placeholder" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                                <div class="game-overlay">
+                                    <button class="play-btn">Chơi ngay</button>
+                                </div>
+                                <button class="remove-favorite" title="Xóa khỏi yêu thích">❤️</button>
+                            </div>
+                            <div class="game-info">
+                                <h3 class="game-title">Slope Game</h3>
+                                <div class="game-meta">
+                                    <span class="rating">⭐ 4.7</span>
+                                    <span class="plays">👁 8.1M</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="game-card">
+                            <div class="game-thumb">
+                                <div class="game-thumb-placeholder" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                                <div class="game-overlay">
+                                    <button class="play-btn">Chơi ngay</button>
+                                </div>
+                                <button class="remove-favorite" title="Xóa khỏi yêu thích">❤️</button>
+                            </div>
+                            <div class="game-info">
+                                <h3 class="game-title">Subway Surfers</h3>
+                                <div class="game-meta">
+                                    <span class="rating">⭐ 4.6</span>
+                                    <span class="plays">👁 12M</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="game-card">
+                            <div class="game-thumb">
+                                <div class="game-thumb-placeholder" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
+                                <div class="game-overlay">
+                                    <button class="play-btn">Chơi ngay</button>
+                                </div>
+                                <button class="remove-favorite" title="Xóa khỏi yêu thích">❤️</button>
+                            </div>
+                            <div class="game-info">
+                                <h3 class="game-title">Temple Run 2</h3>
+                                <div class="game-meta">
+                                    <span class="rating">⭐ 4.5</span>
+                                    <span class="plays">👁 9.8M</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Tab -->
+                <div id="history" class="tab-panel">
+                    <h2>Lịch sử chơi game</h2>
+                    <div class="history-list">
+                        <div class="history-item">
+                            <div class="history-thumb">
+                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                            </div>
+                            <div class="history-info">
+                                <h4>Fireboy and Watergirl</h4>
+                                <p>Chơi lần cuối: Hôm nay, 14:30</p>
+                            </div>
+                            <button class="btn-play-again">Chơi lại</button>
+                        </div>
+                        <div class="history-item">
+                            <div class="history-thumb">
+                                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                            </div>
+                            <div class="history-info">
+                                <h4>Slope Game</h4>
+                                <p>Chơi lần cuối: Hôm qua, 20:15</p>
+                            </div>
+                            <button class="btn-play-again">Chơi lại</button>
+                        </div>
+                        <div class="history-item">
+                            <div class="history-thumb">
+                                <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"></div>
+                            </div>
+                            <div class="history-info">
+                                <h4>Papa's Pizzeria</h4>
+                                <p>Chơi lần cuối: 3 ngày trước</p>
+                            </div>
+                            <button class="btn-play-again">Chơi lại</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ratings Tab -->
+                <div id="ratings" class="tab-panel">
+                    <h2>Đánh giá của tôi (89)</h2>
+                    <div class="ratings-list">
+                        <div class="rating-item">
+                            <div class="rating-game">
+                                <div class="rating-thumb">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                                </div>
+                                <span>Fireboy and Watergirl</span>
+                            </div>
+                            <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                            <span class="rating-date">2 ngày trước</span>
+                        </div>
+                        <div class="rating-item">
+                            <div class="rating-game">
+                                <div class="rating-thumb">
+                                    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                                </div>
+                                <span>Slope Game</span>
+                            </div>
+                            <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                            <span class="rating-date">1 tuần trước</span>
+                        </div>
+                        <div class="rating-item">
+                            <div class="rating-game">
+                                <div class="rating-thumb">
+                                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                                </div>
+                                <span>Subway Surfers</span>
+                            </div>
+                            <div class="rating-stars">⭐⭐⭐⭐</div>
+                            <span class="rating-date">2 tuần trước</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="settings" class="tab-panel">
+                    <h2>Cài đặt tài khoản</h2>
+                    <form class="settings-form">
+                        <div class="form-group">
+                            <label>Tên đăng nhập</label>
+                            <input type="text" value="GameMaster" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" value="gamemaster@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Mật khẩu hiện tại</label>
+                            <input type="password" placeholder="Nhập mật khẩu hiện tại">
+                        </div>
+                        <div class="form-group">
+                            <label>Mật khẩu mới</label>
+                            <input type="password" placeholder="Nhập mật khẩu mới">
+                        </div>
+                        <div class="form-group">
+                            <label>Xác nhận mật khẩu mới</label>
+                            <input type="password" placeholder="Nhập lại mật khẩu mới">
+                        </div>
+                        <button type="submit" class="btn-save">Lưu thay đổi</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-logo">
+                    <span class="logo-y">Y</span>
+                    <span class="logo-8">8</span>
+                    <span class="logo-com">.COM</span>
+                </div>
+                <div class="footer-social">
+                    <a href="#" class="social-link">Facebook</a>
+                    <a href="#" class="social-link">Twitter</a>
+                    <a href="#" class="social-link">YouTube</a>
+                    <a href="#" class="social-link">Discord</a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Game</h4>
+                    <ul>
+                        <li><a href="#">Game Mới</a></li>
+                        <li><a href="#">Game Hay Nhất</a></li>
+                        <li><a href="#">Game Hot</a></li>
+                        <li><a href="#">Yêu Thích</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Thể Loại</h4>
+                    <ul>
+                        <li><a href="#">Hành Động</a></li>
+                        <li><a href="#">Phiêu Lưu</a></li>
+                        <li><a href="#">Chiến Thuật</a></li>
+                        <li><a href="#">Giải Đố</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Hỗ Trợ</h4>
+                    <ul>
+                        <li><a href="#">Trung Tâm Trợ Giúp</a></li>
+                        <li><a href="#">Liên Hệ</a></li>
+                        <li><a href="#">Báo Lỗi</a></li>
+                        <li><a href="#">Yêu Cầu Game</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Pháp Lý</h4>
+                    <ul>
+                        <li><a href="#">Điều Khoản</a></li>
+                        <li><a href="#">Chính Sách</a></li>
+                        <li><a href="#">Bản Quyền</a></li>
+                        <li><a href="#">Cookie</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 Y8.COM - Tất cả các quyền được bảo lưu. Chơi game trực tuyến miễn phí!</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="api.js"></script>
+    <script src="main.js"></script>
+    <script>
+        // Tab switching
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanels.forEach(p => p.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Remove favorite
+        document.querySelectorAll('.remove-favorite').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const gameCard = btn.closest('.game-card');
+                const gameId = gameCard.dataset.gameId;
+                if (confirm('Xóa game này khỏi danh sách yêu thích?')) {
+                    window.API.Favorites.removeFavorite(gameId).then(() => {
+                        gameCard.remove();
+                    }).catch(err => console.error('Error:', err));
+                }
+            });
+        });
+    </script>
+</body>
+</html>
