@@ -1,5 +1,6 @@
 package com.example.game36h.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"game.ratings", "user.ratings"})
 public class Rating {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,6 +1,7 @@
 package com.example.game36h.service;
 
 import com.example.game36h.dto.RatingRequest;
+import com.example.game36h.dto.RatingResponse;
 import com.example.game36h.entity.Rating;
 import com.example.game36h.entity.Game;
 import com.example.game36h.entity.User;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RatingService {
@@ -21,21 +23,23 @@ public class RatingService {
     @Autowired
     private GameRepository gameRepository;
 
-    public Rating createRating(RatingRequest request, Long userId) {
+    public RatingResponse createRating(RatingRequest request, Long userId) {
         // Validate game exists
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new RuntimeException("Game not found"));
 
         // Check if user already rated this game
         Optional<Rating> existingRating = ratingRepository.findByUserIdAndGameId(userId, request.getGameId());
+        Rating rating;
+        
         if (existingRating.isPresent()) {
             // Update existing rating
-            Rating rating = existingRating.get();
+            rating = existingRating.get();
             rating.setScore(request.getScore());
-            return ratingRepository.save(rating);
+            rating = ratingRepository.save(rating);
         } else {
             // Create new rating
-            Rating rating = new Rating();
+            rating = new Rating();
             rating.setScore(request.getScore());
 
             User user = new User();
@@ -43,15 +47,19 @@ public class RatingService {
             rating.setUser(user);
 
             rating.setGame(game);
-
-            return ratingRepository.save(rating);
+            rating = ratingRepository.save(rating);
         }
+
+        return convertToRatingResponse(rating);
     }
 
-    public List<Rating> getRatingsByGameId(Long gameId) {
-        Game game = gameRepository.findById(gameId)
+    public List<RatingResponse> getRatingsByGameId(Long gameId) {
+        // Validate game exists
+        gameRepository.findById(gameId)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
-        return ratingRepository.findAll();
+        return ratingRepository.findByGameId(gameId).stream()
+                .map(this::convertToRatingResponse)
+                .collect(Collectors.toList());
     }
 
     public Double getAverageRating(Long gameId) {
@@ -60,5 +68,28 @@ public class RatingService {
 
     public Long getRatingCount(Long gameId) {
         return ratingRepository.getRatingCountByGameId(gameId);
+    }
+
+    private RatingResponse convertToRatingResponse(Rating rating) {
+        RatingResponse response = new RatingResponse();
+        response.setId(rating.getId());
+        response.setScore(rating.getScore());
+        response.setCreatedAt(rating.getCreatedAt());
+
+        if (rating.getUser() != null) {
+            response.setUser(convertToUserDto(rating.getUser()));
+        }
+
+        return response;
+    }
+
+    private com.example.game36h.dto.UserDto convertToUserDto(User user) {
+        com.example.game36h.dto.UserDto dto = new com.example.game36h.dto.UserDto();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setRole(user.getRole().name());
+        dto.setAvatar(user.getAvatar());
+        return dto;
     }
 }

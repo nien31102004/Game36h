@@ -1,7 +1,7 @@
 package com.example.game36h.controller;
 
 import com.example.game36h.dto.RatingRequest;
-import com.example.game36h.entity.Rating;
+import com.example.game36h.dto.RatingResponse;
 import com.example.game36h.service.RatingService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +23,12 @@ public class RatingController {
     private RatingService ratingService;
 
     @PostMapping
-    public ResponseEntity<Rating> createRating(
+    public ResponseEntity<RatingResponse> createRating(
             @Valid @RequestBody RatingRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         
         Long userId = getUserIdFromUserDetails(userDetails);
-        Rating rating = ratingService.createRating(request, userId);
+        RatingResponse rating = ratingService.createRating(request, userId);
         return ResponseEntity.ok(rating);
     }
 
@@ -47,7 +47,7 @@ class GameRatingController {
 
     @GetMapping("/{id}/ratings")
     public ResponseEntity<Map<String, Object>> getGameRatings(@PathVariable Long id) {
-        List<Rating> ratings = ratingService.getRatingsByGameId(id);
+        List<RatingResponse> ratings = ratingService.getRatingsByGameId(id);
         Double averageRating = ratingService.getAverageRating(id);
         Long ratingCount = ratingService.getRatingCount(id);
 
