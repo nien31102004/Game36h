@@ -241,15 +241,15 @@ async function loadGames(container, fetchFunction, params = {}) {
 }
 
 // Toggle favorite
-async function toggleFavorite(e, gameId) {
-    e.stopPropagation();
+async function toggleFavorite(event, gameId) {
+    event.stopPropagation();
     
     if (!window.API.Auth.isLoggedIn()) {
         window.location.href = 'login.html?redirect=' + window.location.pathname.split('/').pop();
         return;
     }
     
-    const btn = e.target.closest('.favorite-btn');
+    const btn = event.target.closest('.favorite-btn');
     const isFavorite = btn.classList.contains('active');
     
     try {
@@ -258,12 +258,13 @@ async function toggleFavorite(e, gameId) {
             btn.classList.remove('active');
             btn.title = 'Thêm vào yêu thích';
         } else {
-            await window.API.Favorites.addFavorite(gameId);
+            await window.API.Favorites.toggleFavorite(gameId);
             btn.classList.add('active');
             btn.title = 'Xóa khỏi yêu thích';
         }
     } catch (error) {
         console.error('Error toggling favorite:', error);
+        alert('Không thể cập nhật yêu thích. Vui lòng thử lại.');
     }
 }
 
@@ -301,13 +302,26 @@ async function loadGameDetail(gameId) {
         
         // Update favorite button
         if (window.API.Auth.isLoggedIn()) {
-            const isFav = await window.API.Favorites.isFavorite(gameId);
-            const favBtn = document.getElementById('favoriteBtn');
-            if (isFav.is_favorite) {
-                favBtn.classList.add('active');
-                favBtn.innerHTML = '<span>❤️</span> Đã thích';
+            // Check if game is in favorites by trying to get user favorites and checking
+            try {
+                const favoritesResult = await window.API.Favorites.getFavorites();
+                const favorites = favoritesResult.content || favoritesResult.data || favoritesResult || [];
+                const isFavorited = favorites.some(fav => (fav.game?.id || fav.gameId) == gameId);
+                
+                const favBtn = document.getElementById('favoriteBtn');
+                if (isFavorited) {
+                    favBtn.classList.add('active');
+                    favBtn.innerHTML = '<span>❤️</span> Đã thích';
+                } else {
+                    favBtn.innerHTML = '<span>🤍</span> Yêu thích';
+                }
+                favBtn.onclick = () => toggleGameFavorite(gameId, favBtn);
+            } catch (error) {
+                console.error('Error checking favorite status:', error);
+                const favBtn = document.getElementById('favoriteBtn');
+                favBtn.innerHTML = '<span>🤍</span> Yêu thích';
+                favBtn.onclick = () => toggleGameFavorite(gameId, favBtn);
             }
-            favBtn.onclick = () => toggleGameFavorite(gameId, favBtn);
         }
         
         // Load comments
@@ -338,14 +352,17 @@ async function toggleGameFavorite(gameId, btn) {
         if (isActive) {
             await window.API.Favorites.removeFavorite(gameId);
             btn.classList.remove('active');
-            btn.innerHTML = '<span>❤️</span> Yêu thích';
+            btn.innerHTML = '<span>🤍</span> Yêu thích';
         } else {
-            await window.API.Favorites.addFavorite(gameId);
-            btn.classList.add('active');
-            btn.innerHTML = '<span>❤️</span> Đã thích';
+            const result = await window.API.Favorites.toggleFavorite(gameId);
+            if (result) { // Only add to active if result is not null (not unfavorited)
+                btn.classList.add('active');
+                btn.innerHTML = '<span>❤️</span> Đã thích';
+            }
         }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error toggling favorite:', error);
+        alert('Không thể cập nhật yêu thích. Vui lòng thử lại.');
     }
 }
 

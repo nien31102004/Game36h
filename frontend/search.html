@@ -222,7 +222,7 @@
                         q: currentFilters.q,
                         category: currentFilters.category,
                         sort: currentFilters.sort,
-                        page: currentPage,
+                        page: currentPage - 1, // Spring page starts at 0
                         limit: currentFilters.limit
                     });
                 } else if (currentFilters.category) {
@@ -232,13 +232,17 @@
                     // Get all games with sorting
                     result = await window.API.Games.getGames({
                         sort: currentFilters.sort,
-                        page: currentPage,
+                        page: currentPage - 1, // Spring page starts at 0
                         limit: currentFilters.limit
                     });
                 }
 
-                const games = result.data || result.games || result;
-                const total = result.total || games.length;
+                console.log('Search result:', result); // Debug
+
+                const games = result.content || result.data || result.games || [];
+                const total = result.totalElements ?? result.total ?? games.length;
+
+                console.log('Games:', games, 'Total:', total, 'Count:', games.length); // Debug
 
                 document.getElementById('resultsCount').textContent = total;
 
@@ -420,6 +424,63 @@
                 document.getElementById('sortFilter').value = 'newest';
             }
             applyFilters();
+        }
+
+        // Override createGameCard to use custom playGame
+        function createGameCard(game) {
+            const isFavorite = game.is_favorite || false;
+            
+            return `
+                <div class="game-card ${game.featured ? 'featured' : ''}" data-game-id="${game.id}">
+                    <div class="game-thumb">
+                        <img src="${game.thumbnail || 'placeholder.jpg'}" alt="${game.title}" class="game-image">
+                        <div class="game-overlay">
+                            <button class="play-btn" onclick="playGame(${game.id})">Chơi ngay</button>
+                        </div>
+                        ${window.API.Auth.isLoggedIn() ? `
+                            <button class="favorite-btn ${isFavorite ? 'active' : ''}" 
+                                    onclick="toggleFavorite(event, ${game.id})"
+                                    title="${isFavorite ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">
+                                ❤️
+                            </button>
+                        ` : ''}
+                    </div>
+                    <div class="game-info">
+                        <h3 class="game-title" onclick="playGame(${game.id})">${game.title}</h3>
+                        <div class="game-meta">
+                            <span class="rating">⭐ ${game.averageRating || game.rating || '4.5'}</span>
+                            <span class="plays">👁 ${formatNumber(game.views || 0)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function playGame(gameId) {
+            // Add to history if logged in
+            if (window.API.Auth.isLoggedIn()) {
+                try {
+                    await window.API.History.addToHistory(gameId);
+                    console.log('Added to history');
+                } catch (err) {
+                    console.error('Failed to add history:', err);
+                }
+            }
+            
+            // Increment views
+            try {
+                await window.API.Games.incrementViews(gameId);
+            } catch (err) {
+                console.error('Failed to increment views:', err);
+            }
+            
+            window.location.href = `game.html?id=${gameId}`;
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num;
         }
     </script>
 </body>

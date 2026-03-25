@@ -3,6 +3,7 @@ package com.example.game36h.controller;
 import com.example.game36h.dto.GameRequest;
 import com.example.game36h.dto.GameResponse;
 import com.example.game36h.service.GameService;
+import com.example.game36h.security.UserPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -127,8 +128,9 @@ public class GameController {
     }
 
     private Long getUserIdFromUserDetails(UserDetails userDetails) {
-        // This is a simplified approach. In a real application, you might want to
-        // fetch the full User entity from the database
-        return 1L; // Placeholder - you should implement proper user ID extraction
+        if (userDetails instanceof UserPrincipal) {
+            return ((UserPrincipal) userDetails).getId();
+        }
+        throw new RuntimeException("Invalid user details");
     }
 }

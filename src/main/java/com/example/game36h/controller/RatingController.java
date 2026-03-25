@@ -3,6 +3,7 @@ package com.example.game36h.controller;
 import com.example.game36h.dto.RatingRequest;
 import com.example.game36h.dto.RatingResponse;
 import com.example.game36h.service.RatingService;
+import com.example.game36h.security.UserPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,38 @@ public class RatingController {
         return ResponseEntity.ok(rating);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<RatingResponse> updateRating(
+            @PathVariable Long id,
+            @Valid @RequestBody RatingRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        Long userId = getUserIdFromUserDetails(userDetails);
+        RatingResponse rating = ratingService.updateRating(id, request, userId);
+        return ResponseEntity.ok(rating);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRating(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        Long userId = getUserIdFromUserDetails(userDetails);
+        ratingService.deleteRating(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<RatingResponse> getRatingById(@PathVariable Long id) {
+        RatingResponse rating = ratingService.getRatingById(id);
+        return ResponseEntity.ok(rating);
+    }
+
     private Long getUserIdFromUserDetails(UserDetails userDetails) {
-        return 1L; // Placeholder - implement proper user ID extraction
+        if (userDetails instanceof UserPrincipal) {
+            return ((UserPrincipal) userDetails).getId();
+        }
+        throw new RuntimeException("Invalid user details");
     }
 }
 
@@ -60,6 +91,9 @@ class GameRatingController {
     }
 
     private Long getUserIdFromUserDetails(UserDetails userDetails) {
-        return 1L; // Placeholder - implement proper user ID extraction
+        if (userDetails instanceof UserPrincipal) {
+            return ((UserPrincipal) userDetails).getId();
+        }
+        throw new RuntimeException("Invalid user details");
     }
 }

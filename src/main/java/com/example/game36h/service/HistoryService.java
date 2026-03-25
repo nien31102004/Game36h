@@ -1,5 +1,6 @@
 package com.example.game36h.service;
 
+import com.example.game36h.dto.HistoryDto;
 import com.example.game36h.entity.History;
 import com.example.game36h.entity.Game;
 import com.example.game36h.entity.User;
@@ -47,5 +48,25 @@ public class HistoryService {
         History history = historyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("History not found with id: " + id));
         historyRepository.delete(history);
+    }
+
+    public Page<HistoryDto> getUserHistoryDto(Long userId, Pageable pageable) {
+        Page<History> histories = historyRepository.findByUserIdOrderByPlayedAtDesc(userId, pageable);
+        return histories.map(this::convertToDto);
+    }
+
+    private HistoryDto convertToDto(History history) {
+        HistoryDto dto = new HistoryDto();
+        dto.setId(history.getId());
+        dto.setPlayedAt(history.getPlayedAt());
+        
+        if (history.getGame() != null) {
+            dto.setGameId(history.getGame().getId());
+            dto.setGameTitle(history.getGame().getTitle());
+            dto.setGameThumbnail(history.getGame().getThumbnail());
+            dto.setGameUrl(history.getGame().getGameUrl());
+        }
+        
+        return dto;
     }
 }

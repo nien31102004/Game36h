@@ -1,5 +1,6 @@
 package com.example.game36h.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,7 @@ public class History {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id", nullable = false)
+    @JsonBackReference
     private Game game;
 
     @Column(name = "played_at", nullable = false)
@@ -32,4 +34,17 @@ public class History {
     protected void onCreate() {
         playedAt = LocalDateTime.now();
     }
+
+    // Manual getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+    
+    public Game getGame() { return game; }
+    public void setGame(Game game) { this.game = game; }
+    
+    public LocalDateTime getPlayedAt() { return playedAt; }
+    public void setPlayedAt(LocalDateTime playedAt) { this.playedAt = playedAt; }
 }

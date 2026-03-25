@@ -60,6 +60,25 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
+    public CommentResponse updateComment(Long commentId, CommentRequest request, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new RuntimeException("You can only update your own comments");
+        }
+
+        comment.setContent(request.getContent());
+        comment = commentRepository.save(comment);
+        return convertToCommentResponse(comment);
+    }
+
+    public CommentResponse getCommentById(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        return convertToCommentResponse(comment);
+    }
+
     private CommentResponse convertToCommentResponse(Comment comment) {
         CommentResponse response = new CommentResponse();
         response.setId(comment.getId());

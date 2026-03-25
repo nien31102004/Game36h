@@ -70,6 +70,36 @@ public class RatingService {
         return ratingRepository.getRatingCountByGameId(gameId);
     }
 
+    public RatingResponse updateRating(Long ratingId, RatingRequest request, Long userId) {
+        Rating rating = ratingRepository.findById(ratingId)
+                .orElseThrow(() -> new RuntimeException("Rating not found"));
+
+        if (!rating.getUser().getId().equals(userId)) {
+            throw new RuntimeException("You can only update your own ratings");
+        }
+
+        rating.setScore(request.getScore());
+        rating = ratingRepository.save(rating);
+        return convertToRatingResponse(rating);
+    }
+
+    public void deleteRating(Long ratingId, Long userId) {
+        Rating rating = ratingRepository.findById(ratingId)
+                .orElseThrow(() -> new RuntimeException("Rating not found"));
+
+        if (!rating.getUser().getId().equals(userId)) {
+            throw new RuntimeException("You can only delete your own ratings");
+        }
+
+        ratingRepository.delete(rating);
+    }
+
+    public RatingResponse getRatingById(Long ratingId) {
+        Rating rating = ratingRepository.findById(ratingId)
+                .orElseThrow(() -> new RuntimeException("Rating not found"));
+        return convertToRatingResponse(rating);
+    }
+
     private RatingResponse convertToRatingResponse(Rating rating) {
         RatingResponse response = new RatingResponse();
         response.setId(rating.getId());

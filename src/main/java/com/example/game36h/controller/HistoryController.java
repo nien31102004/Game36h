@@ -1,7 +1,9 @@
 package com.example.game36h.controller;
 
+import com.example.game36h.dto.HistoryDto;
 import com.example.game36h.entity.History;
 import com.example.game36h.service.HistoryService;
+import com.example.game36h.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,6 +49,17 @@ public class HistoryController {
         return ResponseEntity.ok(history);
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<HistoryDto>> getUserHistoryById(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        Pageable pageable = PageRequest.of(page, size);
+        Page<HistoryDto> history = historyService.getUserHistoryDto(userId, pageable);
+        return ResponseEntity.ok(history);
+    }
+
     @DeleteMapping("/by-id/{id}")
     public ResponseEntity<Void> deleteHistoryById(@PathVariable Long id) {
         historyService.deleteHistoryById(id);
@@ -54,6 +67,9 @@ public class HistoryController {
     }
 
     private Long getUserIdFromUserDetails(UserDetails userDetails) {
-        return 1L; // Placeholder - implement proper user ID extraction
+        if (userDetails instanceof UserPrincipal) {
+            return ((UserPrincipal) userDetails).getId();
+        }
+        throw new RuntimeException("Invalid user details");
     }
 }

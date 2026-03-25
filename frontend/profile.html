@@ -72,10 +72,6 @@
                         <span class="stat-number" id="statFavorites">0</span>
                         <span class="stat-label">Yêu thích</span>
                     </div>
-                    <div class="profile-stat">
-                        <span class="stat-number" id="statComments">0</span>
-                        <span class="stat-label">Bình luận</span>
-                    </div>
                 </div>
             </section>
 
@@ -83,7 +79,6 @@
             <div class="profile-tabs">
                 <button class="tab-btn active" data-tab="favorites">⭐ Yêu thích</button>
                 <button class="tab-btn" data-tab="history">🕐 Lịch sử</button>
-                <button class="tab-btn" data-tab="ratings">⭐ Đánh giá</button>
                 <button class="tab-btn" data-tab="settings">⚙️ Cài đặt</button>
             </div>
 
@@ -101,14 +96,6 @@
                 <div id="history" class="tab-panel">
                     <h2>Lịch sử chơi game</h2>
                     <div class="history-list" id="historyList">
-                        <div class="loading">Đang tải...</div>
-                    </div>
-                </div>
-
-                <!-- Ratings Tab -->
-                <div id="ratings" class="tab-panel">
-                    <h2>Đánh giá của tôi (<span id="ratingsCount">0</span>)</h2>
-                    <div class="ratings-list" id="ratingsList">
                         <div class="loading">Đang tải...</div>
                     </div>
                 </div>
@@ -167,7 +154,6 @@
             loadUserStats();
             loadFavorites();
             loadHistory();
-            loadRatings();
             initSettingsForm();
         });
 
@@ -217,19 +203,20 @@
 
         async function loadUserStats() {
             try {
-                const [favoritesRes, historyRes, commentsRes] = await Promise.all([
-                    API.Favorites.getFavorites().catch(() => ({ data: [] })),
-                    API.History.getHistory().catch(() => ({ data: [] })),
-                    API.Comments.getMyComments().catch(() => ({ data: [] }))
+                const user = API.Auth.getCurrentUser();
+                const userId = user?.id;
+                if (!userId) return;
+                
+                const [favoritesRes, historyRes] = await Promise.all([
+                    API.Favorites.getUserFavorites(userId).catch(() => ({ content: [] })),
+                    API.History.getUserHistory(userId).catch(() => ({ content: [] }))
                 ]);
                 
-                const favorites = favoritesRes.data || favoritesRes || [];
-                const history = historyRes.data || historyRes || [];
-                const comments = commentsRes.data || commentsRes || [];
+                const favorites = favoritesRes.content || favoritesRes.data || [];
+                const history = historyRes.content || historyRes.data || [];
                 
                 document.getElementById('statFavorites').textContent = favorites.length || 0;
                 document.getElementById('statGames').textContent = history.length || 0;
-                document.getElementById('statComments').textContent = comments.length || 0;
             } catch (err) {
                 console.error('Error loading stats:', err);
             }
@@ -238,8 +225,15 @@
         async function loadFavorites() {
             const grid = document.getElementById('favoritesGrid');
             try {
-                const result = await API.Favorites.getFavorites();
-                const favorites = result.data || result || [];
+                const user = API.Auth.getCurrentUser();
+                const userId = user?.id;
+                if (!userId) {
+                    grid.innerHTML = '<div class="error">Vui lòng đăng nhập</div>';
+                    return;
+                }
+                
+                const result = await API.Favorites.getUserFavorites(userId);
+                const favorites = result.content || result.data || [];
                 
                 document.getElementById('favoritesCount').textContent = favorites.length;
                 
@@ -249,21 +243,21 @@
                 }
                 
                 grid.innerHTML = favorites.map(fav => {
-                    const game = fav.game || fav;
-                    const gradient = getGradientForGame(game.id || game.game_id);
+                    const gradient = getGradientForGame(fav.game?.id || fav.gameId);
+                    const game = fav.game || {};
                     return `
-                        <div class="game-card" data-game-id="${game.id || game.game_id}">
+                        <div class="game-card" data-favorite-id="${fav.id}" data-game-id="${game.id || fav.gameId}">
                             <div class="game-thumb">
                                 <div class="game-thumb-placeholder" style="background: ${gradient};"></div>
                                 <div class="game-overlay">
-                                    <a href="game.html?id=${game.id || game.game_id}" class="play-btn">Chơi ngay</a>
+                                    <button class="play-btn" onclick="playGame('${game.id || fav.gameId}')">Chơi ngay</button>
                                 </div>
-                                <button class="remove-favorite" title="Xóa khỏi yêu thích" onclick="removeFavorite('${game.id || game.game_id}', this)">❤️</button>
+                                <button class="remove-favorite" title="Xóa khỏi yêu thích" onclick="removeFavorite('${fav.id}', this)">❤️</button>
                             </div>
                             <div class="game-info">
-                                <h3 class="game-title">${game.title || 'Game'}</h3>
+                                <h3 class="game-title">${game.title || fav.gameTitle || 'Game'}</h3>
                                 <div class="game-meta">
-                                    <span class="rating">⭐ ${game.rating || '0'}</span>
+                                    <span class="rating">⭐ ${game.averageRating || 0}</span>
                                     <span class="plays">👁 ${formatNumber(game.views || 0)}</span>
                                 </div>
                             </div>
@@ -279,8 +273,15 @@
         async function loadHistory() {
             const list = document.getElementById('historyList');
             try {
-                const result = await API.History.getHistory();
-                const history = result.data || result || [];
+                const user = API.Auth.getCurrentUser();
+                const userId = user?.id;
+                if (!userId) {
+                    list.innerHTML = '<div class="error">Vui lòng đăng nhập</div>';
+                    return;
+                }
+                
+                const result = await API.History.getUserHistory(userId);
+                const history = result.content || result.data || [];
                 
                 if (history.length === 0) {
                     list.innerHTML = '<div class="empty-state">Chưa có lịch sử chơi game</div>';
@@ -288,19 +289,19 @@
                 }
                 
                 list.innerHTML = history.map(item => {
-                    const game = item.game || item;
-                    const gradient = getGradientForGame(game.id || game.game_id);
-                    const playedAt = item.played_at ? formatTimeAgo(new Date(item.played_at)) : '';
+                    const gradient = getGradientForGame(item.game?.id || item.gameId);
+                    const game = item.game || {};
+                    const playedAt = item.createdAt || item.playedAt ? formatTimeAgo(new Date(item.createdAt || item.playedAt)) : '';
                     return `
                         <div class="history-item" data-history-id="${item.id}">
                             <div class="history-thumb">
                                 <div style="background: ${gradient};"></div>
                             </div>
                             <div class="history-info">
-                                <h4>${game.title || 'Game'}</h4>
+                                <h4>${game.title || item.gameTitle || 'Game'}</h4>
                                 <p>Chơi lần cuối: ${playedAt}</p>
                             </div>
-                            <a href="game.html?id=${game.id || game.game_id}" class="btn-play-again">Chơi lại</a>
+                            <button onclick="playGame('${game.id || item.gameId}')" class="btn-play-again">Chơi lại</button>
                         </div>
                     `;
                 }).join('');
@@ -310,47 +311,32 @@
             }
         }
 
-        async function loadRatings() {
-            const list = document.getElementById('ratingsList');
-            try {
-                const result = await API.Ratings.getMyRatings();
-                const ratings = result.data || result || [];
-                
-                document.getElementById('ratingsCount').textContent = ratings.length;
-                
-                if (ratings.length === 0) {
-                    list.innerHTML = '<div class="empty-state">Chưa có đánh giá nào</div>';
-                    return;
+        async function playGame(gameId) {
+            // Add to history if logged in
+            if (API.Auth.isLoggedIn()) {
+                try {
+                    await API.History.addToHistory(gameId);
+                    console.log('Added to history');
+                } catch (err) {
+                    console.error('Failed to add history:', err);
                 }
-                
-                list.innerHTML = ratings.map(rating => {
-                    const game = rating.game || {};
-                    const gradient = getGradientForGame(game.id || rating.game_id);
-                    const stars = '⭐'.repeat(rating.score || 0);
-                    const ratedAt = rating.created_at ? formatTimeAgo(new Date(rating.created_at)) : '';
-                    return `
-                        <div class="rating-item">
-                            <div class="rating-game">
-                                <div class="rating-thumb">
-                                    <div style="background: ${gradient};"></div>
-                                </div>
-                                <span>${game.title || 'Game'}</span>
-                            </div>
-                            <div class="rating-stars">${stars}</div>
-                            <span class="rating-date">${ratedAt}</span>
-                        </div>
-                    `;
-                }).join('');
-            } catch (err) {
-                console.error('Error loading ratings:', err);
-                list.innerHTML = '<div class="error">Không thể tải đánh giá</div>';
             }
+            
+            // Increment views
+            try {
+                await API.Games.incrementViews(gameId);
+            } catch (err) {
+                console.error('Failed to increment views:', err);
+            }
+            
+            // Navigate to game page
+            window.location.href = `game.html?id=${gameId}`;
         }
 
-        async function removeFavorite(gameId, btn) {
+        async function removeFavorite(favoriteId, btn) {
             if (!confirm('Xóa game này khỏi danh sách yêu thích?')) return;
             try {
-                await API.Favorites.removeFavorite(gameId);
+                await API.Favorites.removeFavoriteById(favoriteId);
                 const gameCard = btn.closest('.game-card');
                 gameCard.remove();
                 
@@ -372,6 +358,8 @@
 
         function initSettingsForm() {
             const form = document.getElementById('settingsForm');
+            const saveBtn = form.querySelector('.btn-save');
+            
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
@@ -380,34 +368,64 @@
                 const newPassword = document.getElementById('newPassword').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
                 
+                // Loading state
+                const originalBtnText = saveBtn.textContent;
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Đang lưu...';
+                
                 try {
+                    let message = '';
+                    
                     // Update email if changed
                     const user = API.Auth.getCurrentUser();
                     if (email && email !== user.email) {
                         await API.Auth.updateProfile({ email });
+                        // Update localStorage
+                        user.email = email;
+                        localStorage.setItem('user', JSON.stringify(user));
+                        message += 'Email đã cập nhật. ';
                     }
                     
                     // Change password if provided
                     if (newPassword) {
                         if (newPassword !== confirmPassword) {
                             alert('Mật khẩu mới không khớp');
+                            saveBtn.disabled = false;
+                            saveBtn.textContent = originalBtnText;
                             return;
                         }
                         if (!currentPassword) {
                             alert('Vui lòng nhập mật khẩu hiện tại');
+                            saveBtn.disabled = false;
+                            saveBtn.textContent = originalBtnText;
                             return;
                         }
                         await API.Auth.changePassword({ currentPassword, newPassword });
+                        message += 'Mật khẩu đã đổi thành công!';
                     }
                     
-                    alert('Cập nhật thành công!');
+                    alert(message || 'Cập nhật thành công!');
+                    
                     // Clear password fields
                     document.getElementById('currentPassword').value = '';
                     document.getElementById('newPassword').value = '';
                     document.getElementById('confirmPassword').value = '';
+                    
+                    // Update UI
+                    document.querySelector('.profile-email').textContent = email || user.email;
                 } catch (err) {
                     console.error('Error updating settings:', err);
-                    alert('Cập nhật thất bại: ' + (err.message || 'Lỗi không xác định'));
+                    const errorMsg = err.message || 'Lỗi không xác định';
+                    if (errorMsg.includes('Current password is incorrect')) {
+                        alert('Mật khẩu hiện tại không đúng');
+                    } else if (errorMsg.includes('Password')) {
+                        alert('Lỗi mật khẩu: ' + errorMsg);
+                    } else {
+                        alert('Cập nhật thất bại: ' + errorMsg);
+                    }
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = originalBtnText;
                 }
             });
         }

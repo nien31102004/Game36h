@@ -1,5 +1,6 @@
 package com.example.game36h.service;
 
+import com.example.game36h.dto.FavoriteDto;
 import com.example.game36h.entity.Favorite;
 import com.example.game36h.entity.Game;
 import com.example.game36h.entity.User;
@@ -57,5 +58,25 @@ public class FavoriteService {
         Favorite favorite = favoriteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Favorite not found with id: " + id));
         favoriteRepository.delete(favorite);
+    }
+
+    public Page<FavoriteDto> getUserFavoritesDto(Long userId, Pageable pageable) {
+        Page<Favorite> favorites = favoriteRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        return favorites.map(this::convertToDto);
+    }
+
+    private FavoriteDto convertToDto(Favorite favorite) {
+        FavoriteDto dto = new FavoriteDto();
+        dto.setId(favorite.getId());
+        dto.setCreatedAt(favorite.getCreatedAt());
+        
+        if (favorite.getGame() != null) {
+            dto.setGameId(favorite.getGame().getId());
+            dto.setGameTitle(favorite.getGame().getTitle());
+            dto.setGameThumbnail(favorite.getGame().getThumbnail());
+            dto.setGameUrl(favorite.getGame().getGameUrl());
+        }
+        
+        return dto;
     }
 }

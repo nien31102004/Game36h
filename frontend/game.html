@@ -293,6 +293,35 @@
             });
         });
 
+        // Big play button - add to history and play
+        document.querySelector('.big-play-btn').addEventListener('click', async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('id');
+            
+            if (!gameId) return;
+            
+            // Add to history if logged in
+            if (API.Auth.isLoggedIn()) {
+                try {
+                    await API.History.addToHistory(gameId);
+                    console.log('Added to history');
+                } catch (err) {
+                    console.error('Failed to add history:', err);
+                }
+            }
+            
+            // TODO: Load and play the actual game
+            // For now, show placeholder
+            alert('Đang tải game... (Game ID: ' + gameId + ')');
+            
+            // Increment views
+            try {
+                await API.Games.incrementViews(gameId);
+            } catch (err) {
+                console.error('Failed to increment views:', err);
+            }
+        });
+
         // Favorite button
         document.getElementById('favoriteBtn').addEventListener('click', function() {
             const urlParams = new URLSearchParams(window.location.search);

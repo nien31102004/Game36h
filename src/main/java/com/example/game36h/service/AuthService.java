@@ -65,6 +65,20 @@ public class AuthService {
         return new AuthResponse(token, convertToUserDto(user));
     }
 
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Verify current password
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        // Update password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
     private UserDto convertToUserDto(User user) {
         UserDto dto = new UserDto();
         dto.setId(user.getId());

@@ -21,13 +21,21 @@ async function apiCall(endpoint, method = 'GET', data = null, token = null) {
 
     try {
         const response = await fetch(url, options);
-        const result = await response.json();
-
+        
         if (!response.ok) {
-            throw new Error(result.message || 'API Error');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `HTTP ${response.status}`);
         }
-
-        return result;
+        
+        // Handle empty response (204 No Content or empty body)
+        const contentType = response.headers.get('content-type');
+        const contentLength = response.headers.get('content-length');
+        
+        if (response.status === 204 || contentLength === '0' || !contentType?.includes('application/json')) {
+            return null;
+        }
+        
+        return await response.json();
     } catch (error) {
         console.error('API Error:', error);
         throw error;
@@ -80,14 +88,20 @@ const AuthAPI = {
     // Cập nhật profile
     async updateProfile(userData) {
         const token = this.getToken();
-        return apiCall('/users/profile', 'PUT', userData, token);
+        return apiCall('/users/me', 'PUT', userData, token);
     },
 
     // Đổi mật khẩu
     async changePassword(passwords) {
         // passwords: { currentPassword, newPassword }
         const token = this.getToken();
-        return apiCall('/users/password', 'PUT', passwords, token);
+        return apiCall('/auth/change-password', 'PUT', passwords, token);
+    },
+
+    // Lấy thông tin user hiện tại từ server
+    async getCurrentUserProfile() {
+        const token = this.getToken();
+        return apiCall('/users/me', 'GET', null, token);
     }
 };
 
@@ -142,58 +156,43 @@ const GamesAPI = {
     }
 };
 
-// ==================== COMMENTS API ====================
-
-const CommentsAPI = {
-    // Lấy comments của game
-    async getComments(gameId, page = 1, limit = 10) {
-        return apiCall(`/games/${gameId}/comments?page=${page}&limit=${limit}`);
-    },
-
-    // Thêm comment
-    async addComment(gameId, content) {
-        const token = AuthAPI.getToken();
-        return apiCall(`/games/${gameId}/comments`, 'POST', { content }, token);
-    },
-
-    // Xóa comment
-    async deleteComment(commentId) {
-        const token = AuthAPI.getToken();
-        return apiCall(`/comments/${commentId}`, 'DELETE', null, token);
-    },
-
-    // Lấy comments của user hiện tại
-    async getMyComments() {
-        const token = AuthAPI.getToken();
-        return apiCall('/users/comments', 'GET', null, token);
-    }
-};
-
 // ==================== FAVORITES API ====================
 
 const FavoritesAPI = {
-    // Lấy danh sách yêu thích của user
-    async getFavorites() {
+    // Lấy danh sách yêu thích của user hiện tại
+    async getFavorites(page = 0, size = 10) {
         const token = AuthAPI.getToken();
-        return apiCall('/users/favorites', 'GET', null, token);
+        return apiCall(`/favorites?page=${page}&size=${size}`, 'GET', null, token);
     },
 
-    // Thêm vào yêu thích
-    async addFavorite(gameId) {
+    // Thêm vào yêu thích / Toggle favorite
+    async toggleFavorite(gameId) {
         const token = AuthAPI.getToken();
-        return apiCall('/users/favorites', 'POST', { game_id: gameId }, token);
+        return apiCall(`/favorites/${gameId}`, 'POST', null, token);
     },
 
     // Xóa khỏi yêu thích
     async removeFavorite(gameId) {
         const token = AuthAPI.getToken();
-        return apiCall(`/users/favorites/${gameId}`, 'DELETE', null, token);
+        return apiCall(`/favorites/${gameId}`, 'DELETE', null, token);
     },
 
-    // Kiểm tra game có trong yêu thích không
-    async isFavorite(gameId) {
+    // Xóa favorite theo ID
+    async removeFavoriteById(favoriteId) {
         const token = AuthAPI.getToken();
-        return apiCall(`/users/favorites/check/${gameId}`, 'GET', null, token);
+        return apiCall(`/favorites/by-id/${favoriteId}`, 'DELETE', null, token);
+    },
+
+    // Lấy favorite theo ID
+    async getFavoriteById(favoriteId) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/favorites/by-id/${favoriteId}`, 'GET', null, token);
+    },
+
+    // Lấy danh sách yêu thích của user theo userId
+    async getUserFavorites(userId, page = 0, size = 10) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/favorites/user/${userId}?page=${page}&size=${size}`, 'GET', null, token);
     }
 };
 
@@ -203,7 +202,7 @@ const RatingsAPI = {
     // Lấy đánh giá của user hiện tại
     async getMyRatings() {
         const token = AuthAPI.getToken();
-        return apiCall('/users/ratings', 'GET', null, token);
+        return apiCall('/ratings/user/6', 'GET', null, token); // Using user ID 3 as example
     },
 
     // Đánh giá game
@@ -234,28 +233,34 @@ const RatingsAPI = {
 // ==================== HISTORY API ====================
 
 const HistoryAPI = {
-    // Lấy lịch sử chơi của user
-    async getHistory() {
+    // Lấy lịch sử chơi của user hiện tại
+    async getHistory(page = 0, size = 10) {
         const token = AuthAPI.getToken();
-        return apiCall('/users/history', 'GET', null, token);
+        return apiCall(`/history?page=${page}&size=${size}`, 'GET', null, token);
     },
 
     // Thêm vào lịch sử
     async addToHistory(gameId) {
         const token = AuthAPI.getToken();
-        return apiCall('/history', 'POST', { game_id: gameId }, token);
+        return apiCall(`/history/${gameId}`, 'POST', null, token);
     },
 
-    // Xóa khỏi lịch sử
+    // Lấy lịch sử theo ID
+    async getHistoryById(historyId) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/history/by-id/${historyId}`, 'GET', null, token);
+    },
+
+    // Xóa khỏi lịch sử theo ID
     async removeFromHistory(historyId) {
         const token = AuthAPI.getToken();
-        return apiCall(`/history/${historyId}`, 'DELETE', null, token);
+        return apiCall(`/history/by-id/${historyId}`, 'DELETE', null, token);
     },
 
-    // Xóa toàn bộ lịch sử
-    async clearHistory() {
+    // Lấy lịch sử của user theo userId
+    async getUserHistory(userId, page = 0, size = 10) {
         const token = AuthAPI.getToken();
-        return apiCall('/history', 'DELETE', null, token);
+        return apiCall(`/history/user/${userId}?page=${page}&size=${size}`, 'GET', null, token);
     }
 };
 
@@ -332,15 +337,39 @@ const UserGamesAPI = {
 
 const NotificationsAPI = {
     // Lấy thông báo của user
-    async getNotifications() {
+    async getNotifications(page = 0, size = 10) {
         const token = AuthAPI.getToken();
-        return apiCall('/users/notifications', 'GET', null, token);
+        return apiCall(`/notifications?page=${page}&size=${size}`, 'GET', null, token);
+    },
+
+    // Lấy thông báo chưa đọc
+    async getUnreadNotifications(page = 0, size = 10) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/notifications/unread?page=${page}&size=${size}`, 'GET', null, token);
+    },
+
+    // Lấy thông báo theo ID
+    async getNotificationById(notificationId) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/notifications/${notificationId}`, 'GET', null, token);
+    },
+
+    // Tạo thông báo mới
+    async createNotification(content) {
+        const token = AuthAPI.getToken();
+        return apiCall('/notifications', 'POST', { content }, token);
     },
 
     // Đánh dấu đã đọc
     async markAsRead(notificationId) {
         const token = AuthAPI.getToken();
         return apiCall(`/notifications/${notificationId}/read`, 'PUT', null, token);
+    },
+
+    // Đánh dấu chưa đọc
+    async markAsUnread(notificationId) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/notifications/${notificationId}/unread`, 'PUT', null, token);
     },
 
     // Đánh dấu tất cả đã đọc
@@ -353,6 +382,12 @@ const NotificationsAPI = {
     async deleteNotification(notificationId) {
         const token = AuthAPI.getToken();
         return apiCall(`/notifications/${notificationId}`, 'DELETE', null, token);
+    },
+
+    // Lấy số lượng thông báo chưa đọc
+    async getUnreadCount() {
+        const token = AuthAPI.getToken();
+        return apiCall('/notifications/unread-count', 'GET', null, token);
     }
 };
 
@@ -360,7 +395,6 @@ const NotificationsAPI = {
 window.API = {
     Auth: AuthAPI,
     Games: GamesAPI,
-    Comments: CommentsAPI,
     Favorites: FavoritesAPI,
     Ratings: RatingsAPI,
     History: HistoryAPI,

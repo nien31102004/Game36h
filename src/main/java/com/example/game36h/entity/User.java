@@ -62,4 +62,44 @@ public class User {
     public enum Role {
         USER, ADMIN
     }
+
+    // Manual getters and setters (Lombok not working)
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
+    
+    public String getAvatar() { return avatar; }
+    public void setAvatar(String avatar) { this.avatar = avatar; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    public List<Game> getGames() { return games; }
+    public void setGames(List<Game> games) { this.games = games; }
+    
+    public List<Rating> getRatings() { return ratings; }
+    public void setRatings(List<Rating> ratings) { this.ratings = ratings; }
+    
+    public List<Comment> getComments() { return comments; }
+    public void setComments(List<Comment> comments) { this.comments = comments; }
+    
+    public List<Favorite> getFavorites() { return favorites; }
+    public void setFavorites(List<Favorite> favorites) { this.favorites = favorites; }
+    
+    public List<History> getHistories() { return histories; }
+    public void setHistories(List<History> histories) { this.histories = histories; }
+    
+    public List<Notification> getNotifications() { return notifications; }
+    public void setNotifications(List<Notification> notifications) { this.notifications = notifications; }
 }

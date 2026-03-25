@@ -3,6 +3,7 @@ package com.example.game36h.controller;
 import com.example.game36h.dto.CommentRequest;
 import com.example.game36h.dto.CommentResponse;
 import com.example.game36h.service.CommentService;
+import com.example.game36h.security.UserPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,17 @@ public class CommentController {
         return ResponseEntity.ok(comment);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<CommentResponse> updateComment(
+            @PathVariable Long id,
+            @Valid @RequestBody CommentRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        Long userId = getUserIdFromUserDetails(userDetails);
+        CommentResponse comment = commentService.updateComment(id, request, userId);
+        return ResponseEntity.ok(comment);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long id,
@@ -41,8 +53,17 @@ public class CommentController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<CommentResponse> getCommentById(@PathVariable Long id) {
+        CommentResponse comment = commentService.getCommentById(id);
+        return ResponseEntity.ok(comment);
+    }
+
     private Long getUserIdFromUserDetails(UserDetails userDetails) {
-        return 1L; // Placeholder - implement proper user ID extraction
+        if (userDetails instanceof UserPrincipal) {
+            return ((UserPrincipal) userDetails).getId();
+        }
+        throw new RuntimeException("Invalid user details");
     }
 }
 

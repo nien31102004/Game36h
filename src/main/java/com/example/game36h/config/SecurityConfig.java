@@ -62,6 +62,8 @@ package com.example.game36h.config;
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/api/games/**").permitAll()
                     .requestMatchers("/api/categories/**").permitAll()
+                    .requestMatchers("/api/favorites/user/**").permitAll()
+                    .requestMatchers("/api/history/user/**").permitAll()
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
                 )

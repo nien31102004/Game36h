@@ -207,7 +207,24 @@
             });
         }
 
-        function playGame(gameId) {
+        async function playGame(gameId) {
+            // Add to history if logged in
+            if (API.Auth.isLoggedIn()) {
+                try {
+                    await API.History.addToHistory(gameId);
+                    console.log('Added to history');
+                } catch (err) {
+                    console.error('Failed to add history:', err);
+                }
+            }
+            
+            // Increment views
+            try {
+                await API.Games.incrementViews(gameId);
+            } catch (err) {
+                console.error('Failed to increment views:', err);
+            }
+            
             window.location.href = `game-detail.html?id=${gameId}`;
         }
     </script>

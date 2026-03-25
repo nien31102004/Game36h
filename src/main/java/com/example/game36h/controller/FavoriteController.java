@@ -1,7 +1,9 @@
 package com.example.game36h.controller;
 
+import com.example.game36h.dto.FavoriteDto;
 import com.example.game36h.entity.Favorite;
 import com.example.game36h.service.FavoriteService;
+import com.example.game36h.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -64,6 +66,17 @@ public class FavoriteController {
         return ResponseEntity.ok(favorite);
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<FavoriteDto>> getUserFavoritesById(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        Pageable pageable = PageRequest.of(page, size);
+        Page<FavoriteDto> favorites = favoriteService.getUserFavoritesDto(userId, pageable);
+        return ResponseEntity.ok(favorites);
+    }
+
     @DeleteMapping("/by-id/{id}")
     public ResponseEntity<Void> deleteFavoriteById(@PathVariable Long id) {
         favoriteService.deleteFavoriteById(id);
@@ -71,6 +84,9 @@ public class FavoriteController {
     }
 
     private Long getUserIdFromUserDetails(UserDetails userDetails) {
-        return 1L; // Placeholder - implement proper user ID extraction
+        if (userDetails instanceof UserPrincipal) {
+            return ((UserPrincipal) userDetails).getId();
+        }
+        throw new RuntimeException("Invalid user details");
     }
 }
