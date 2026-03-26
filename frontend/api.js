@@ -98,6 +98,21 @@ const AuthAPI = {
         return apiCall('/auth/change-password', 'PUT', passwords, token);
     },
 
+    // Quên mật khẩu - gửi email đặt lại
+    async forgotPassword(email) {
+        return apiCall('/auth/forgot-password', 'POST', { email });
+    },
+
+    // Kiểm tra token đặt lại mật khẩu có hợp lệ không
+    async validateResetToken(token) {
+        return apiCall(`/auth/validate-reset-token?token=${token}`);
+    },
+
+    // Đặt lại mật khẩu với token
+    async resetPassword(token, newPassword) {
+        return apiCall('/auth/reset-password', 'POST', { token, newPassword });
+    },
+
     // Lấy thông tin user hiện tại từ server
     async getCurrentUserProfile() {
         const token = this.getToken();
@@ -275,7 +290,8 @@ const UserGamesAPI = {
     // Lấy danh sách game của user hiện tại
     async getMyGames() {
         const token = AuthAPI.getToken();
-        return apiCall('/games/user/6', 'GET', null, token);
+        const user = AuthAPI.getCurrentUser();
+        return apiCall(`/games/user/${user.id}`, 'GET', null, token);
     },
 
     // Upload game mới
