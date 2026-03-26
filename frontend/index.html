@@ -23,7 +23,10 @@
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Tìm kiếm game...">
                 <button class="search-btn" onclick="searchGames()">
-                    🔍
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
                 </button>
             </div>
 
@@ -152,7 +155,23 @@
         }
 
         // ================= GAMES =================
+        let userFavorites = new Set(); // Store favorite game IDs
+
+        async function loadUserFavorites() {
+            if (!API.Auth.isLoggedIn()) return;
+            try {
+                const user = API.Auth.getCurrentUser();
+                const result = await API.Favorites.getUserFavorites(user.id);
+                const favorites = result.content || result.data || [];
+                userFavorites = new Set(favorites.map(fav => fav.gameId || fav.game?.id));
+            } catch (err) {
+                console.error('Error loading favorites:', err);
+            }
+        }
+
         async function loadGames() {
+            // Load favorites first if logged in
+            await loadUserFavorites();
             try {
                 const games = await API.Games.getGames();
                 renderGames(games);
@@ -162,6 +181,7 @@
         }
 
         async function loadGamesByCategory(categoryId) {
+            await loadUserFavorites();
             try {
                 const games = await API.Games.getGamesByCategory(categoryId);
                 renderGames(games);
@@ -186,12 +206,22 @@
                 const el = document.createElement("div");
                 el.className = "game-card";
 
+                const isFavorite = userFavorites.has(game.id);
+                
                 el.innerHTML = `
                     <div class="game-thumb">
                         <img src="${game.thumbnail || 'https://via.placeholder.com/300'}" alt="${game.title}">
                         <div class="game-overlay">
                             <button class="play-btn" onclick="playGame(${game.id})">Chơi ngay</button>
                         </div>
+                        ${API.Auth.isLoggedIn() ? `
+                            <button class="favorite-btn ${isFavorite ? 'active' : ''}" 
+                                    onclick="toggleFavorite(event, ${game.id}, this)"
+                                    data-game-id="${game.id}"
+                                    title="${isFavorite ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">
+                                ❤️
+                            </button>
+                        ` : ''}
                     </div>
 
                     <div class="game-info">
@@ -225,7 +255,31 @@
                 console.error('Failed to increment views:', err);
             }
             
-            window.location.href = `game-detail.html?id=${gameId}`;
+            window.location.href = `game.html?id=${gameId}`;
+        }
+
+        async function toggleFavorite(event, gameId, btn) {
+            event.stopPropagation();
+            if (!API.Auth.isLoggedIn()) {
+                alert('Vui lòng đăng nhập để thêm vào yêu thích');
+                return;
+            }
+            try {
+                await API.Favorites.toggleFavorite(gameId);
+                // Toggle UI
+                btn.classList.toggle('active');
+                const isActive = btn.classList.contains('active');
+                btn.title = isActive ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích';
+                // Update cache
+                if (isActive) {
+                    userFavorites.add(gameId);
+                } else {
+                    userFavorites.delete(gameId);
+                }
+            } catch (err) {
+                console.error('Error toggling favorite:', err);
+                alert('Không thể thêm vào yêu thích');
+            }
         }
     </script>
 

@@ -15,6 +15,8 @@ public class FavoriteDto {
     private String gameTitle;
     private String gameThumbnail;
     private String gameUrl;
+    private Long views;
+    private Double averageRating;
     private LocalDateTime createdAt;
 
     public Long getId() { return id; }
@@ -31,6 +33,12 @@ public class FavoriteDto {
     
     public String getGameUrl() { return gameUrl; }
     public void setGameUrl(String gameUrl) { this.gameUrl = gameUrl; }
+    
+    public Long getViews() { return views; }
+    public void setViews(Long views) { this.views = views; }
+    
+    public Double getAverageRating() { return averageRating; }
+    public void setAverageRating(Double averageRating) { this.averageRating = averageRating; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

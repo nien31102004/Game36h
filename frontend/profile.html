@@ -35,15 +35,6 @@
         </div>
     </header>
 
-    <!-- Navigation -->
-    <nav class="main-nav">
-        <div class="nav-container">
-            <ul class="nav-menu">
-                <li><a href="index.html">Trang chủ</a></li>
-            </ul>
-        </div>
-    </nav>
-
 
 
     <!-- Profile Content -->
@@ -79,6 +70,8 @@
             <div class="profile-tabs">
                 <button class="tab-btn active" data-tab="favorites">⭐ Yêu thích</button>
                 <button class="tab-btn" data-tab="history">🕐 Lịch sử</button>
+                <button class="tab-btn" data-tab="my-games">🎮 Game của tôi</button>
+                <button class="tab-btn" data-tab="upload">⬆️ Upload Game</button>
                 <button class="tab-btn" data-tab="settings">⚙️ Cài đặt</button>
             </div>
 
@@ -127,6 +120,50 @@
                         <button type="submit" class="btn-save">Lưu thay đổi</button>
                     </form>
                 </div>
+
+                <!-- My Games Tab -->
+                <div id="my-games" class="tab-panel">
+                    <h2>Game của tôi</h2>
+                    <div class="games-list" id="myGamesList">
+                        <div class="loading">Đang tải...</div>
+                    </div>
+                </div>
+
+                <!-- Upload Game Tab -->
+                <div id="upload" class="tab-panel">
+                    <h2>Upload Game Mới</h2>
+                    <form class="upload-form" id="uploadGameForm">
+                        <div class="form-group">
+                            <label>Tên game *</label>
+                            <input type="text" id="gameTitle" placeholder="Nhập tên game" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Mô tả</label>
+                            <textarea id="gameDescription" placeholder="Mô tả ngắn về game (tùy chọn)" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Thể loại *</label>
+                            <select id="gameCategory" required>
+                                <option value="">Chọn thể loại</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>URL game *</label>
+                            <input type="url" id="gameUrl" placeholder="https://example.com/game" required>
+                            <small class="form-hint">Link đến game (iframe URL hoặc trang web)</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Thumbnail URL</label>
+                            <input type="url" id="gameThumbnail" placeholder="https://example.com/image.jpg">
+                            <small class="form-hint">Link ảnh thumbnail (tùy chọn)</small>
+                        </div>
+                        <div class="form-notice">
+                            <span class="notice-icon">ℹ️</span>
+                            <span class="notice-text">Game của bạn sẽ ở trạng thái <strong>CHỜ DUYỆT</strong> sau khi upload. Admin sẽ kiểm tra và phê duyệt trong vòng 24h.</span>
+                        </div>
+                        <button type="submit" class="btn-upload">📤 Upload Game</button>
+                    </form>
+                </div>
             </div>
         </div>
     </main>
@@ -135,7 +172,7 @@
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-bottom">
-                <p>© 2024 Y8.COM - Chơi game trực tuyến miễn phí!</p>
+                <p>© 2024 Game36h - Chơi game trực tuyến miễn phí!</p>
             </div>
         </div>
     </footer>
@@ -154,7 +191,10 @@
             loadUserStats();
             loadFavorites();
             loadHistory();
+            loadMyGames();
+            loadCategoriesForUpload();
             initSettingsForm();
+            initUploadForm();
         });
 
         function updateHeaderActions() {
@@ -243,22 +283,23 @@
                 }
                 
                 grid.innerHTML = favorites.map(fav => {
-                    const gradient = getGradientForGame(fav.game?.id || fav.gameId);
-                    const game = fav.game || {};
+                    const thumbnail = fav.gameThumbnail && fav.gameThumbnail.trim() !== '' 
+                        ? fav.gameThumbnail 
+                        : 'https://via.placeholder.com/300?text=No+Image';
                     return `
-                        <div class="game-card" data-favorite-id="${fav.id}" data-game-id="${game.id || fav.gameId}">
+                        <div class="game-card" data-favorite-id="${fav.id}" data-game-id="${fav.gameId}">
                             <div class="game-thumb">
-                                <div class="game-thumb-placeholder" style="background: ${gradient};"></div>
+                                <img src="${thumbnail}" alt="${fav.gameTitle || 'Game'}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300?text=No+Image'">
                                 <div class="game-overlay">
-                                    <button class="play-btn" onclick="playGame('${game.id || fav.gameId}')">Chơi ngay</button>
+                                    <button class="play-btn" onclick="playGame('${fav.gameId}')">Chơi ngay</button>
                                 </div>
                                 <button class="remove-favorite" title="Xóa khỏi yêu thích" onclick="removeFavorite('${fav.id}', this)">❤️</button>
                             </div>
                             <div class="game-info">
-                                <h3 class="game-title">${game.title || fav.gameTitle || 'Game'}</h3>
+                                <h3 class="game-title">${fav.gameTitle || 'Game'}</h3>
                                 <div class="game-meta">
-                                    <span class="rating">⭐ ${game.averageRating || 0}</span>
-                                    <span class="plays">👁 ${formatNumber(game.views || 0)}</span>
+                                    <span class="rating">⭐ ${fav.averageRating ? fav.averageRating.toFixed(1) : '0.0'}</span>
+                                    <span class="plays">👁 ${formatNumber(fav.views || 0)}</span>
                                 </div>
                             </div>
                         </div>
@@ -289,19 +330,20 @@
                 }
                 
                 list.innerHTML = history.map(item => {
-                    const gradient = getGradientForGame(item.game?.id || item.gameId);
-                    const game = item.game || {};
-                    const playedAt = item.createdAt || item.playedAt ? formatTimeAgo(new Date(item.createdAt || item.playedAt)) : '';
+                    const thumbnail = item.gameThumbnail && item.gameThumbnail.trim() !== '' 
+                        ? item.gameThumbnail 
+                        : 'https://via.placeholder.com/150?text=No+Image';
+                    const playedAt = item.playedAt ? formatTimeAgo(new Date(item.playedAt)) : '';
                     return `
                         <div class="history-item" data-history-id="${item.id}">
                             <div class="history-thumb">
-                                <div style="background: ${gradient};"></div>
+                                <img src="${thumbnail}" alt="${item.gameTitle || 'Game'}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=No+Image'">
                             </div>
                             <div class="history-info">
-                                <h4>${game.title || item.gameTitle || 'Game'}</h4>
+                                <h4>${item.gameTitle || 'Game'}</h4>
                                 <p>Chơi lần cuối: ${playedAt}</p>
                             </div>
-                            <button onclick="playGame('${game.id || item.gameId}')" class="btn-play-again">Chơi lại</button>
+                            <button onclick="playGame('${item.gameId}')" class="btn-play-again">Chơi lại</button>
                         </div>
                     `;
                 }).join('');
@@ -475,6 +517,114 @@
             if (diff < 604800) return `${Math.floor(diff / 86400)} ngày trước`;
             if (diff < 2592000) return `${Math.floor(diff / 604800)} tuần trước`;
             return date.toLocaleDateString('vi-VN');
+        }
+
+        // ================= MY GAMES =================
+        async function loadMyGames() {
+            const list = document.getElementById('myGamesList');
+            try {
+                const user = API.Auth.getCurrentUser();
+                if (!user?.id) {
+                    list.innerHTML = '<div class="error">Vui lòng đăng nhập</div>';
+                    return;
+                }
+                
+                const result = await API.UserGames.getMyGames();
+                const games = result.content || result.data || [];
+                
+                if (games.length === 0) {
+                    list.innerHTML = '<div class="empty-state">Bạn chưa upload game nào. Hãy upload game mới!</div>';
+                    return;
+                }
+                
+                list.innerHTML = games.map(game => {
+                    const statusClass = game.status?.toLowerCase() || 'pending';
+                    const statusText = {
+                        'PENDING': '⏳ Chờ duyệt',
+                        'APPROVED': '✅ Đã duyệt',
+                        'REJECTED': '❌ Từ chối'
+                    }[game.status] || 'Chờ duyệt';
+                    
+                    return `
+                        <div class="game-item" data-game-id="${game.id}">
+                            <div class="game-thumb-small">
+                                <img src="${game.thumbnail || 'placeholder.jpg'}" alt="${game.title}">
+                            </div>
+                            <div class="game-info">
+                                <h4>${game.title}</h4>
+                                <p class="game-category">${game.category?.name || 'Không rõ'}</p>
+                                <span class="game-status ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="game-stats">
+                                <span>👁 ${formatNumber(game.views || 0)}</span>
+                                <span>⭐ ${game.averageRating || 0}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Error loading my games:', err);
+                list.innerHTML = '<div class="error">Không thể tải danh sách game</div>';
+            }
+        }
+
+        // ================= UPLOAD GAME =================
+        async function loadCategoriesForUpload() {
+            try {
+                const categories = await API.Categories.getCategories();
+                const select = document.getElementById('gameCategory');
+                
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    select.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Error loading categories:', err);
+            }
+        }
+
+        function initUploadForm() {
+            const form = document.getElementById('uploadGameForm');
+            const uploadBtn = form.querySelector('.btn-upload');
+            
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const gameData = {
+                    title: document.getElementById('gameTitle').value,
+                    description: document.getElementById('gameDescription').value,
+                    category_id: parseInt(document.getElementById('gameCategory').value),
+                    game_url: document.getElementById('gameUrl').value,
+                    thumbnail: document.getElementById('gameThumbnail').value || null
+                };
+                
+                // Loading state
+                const originalBtnText = uploadBtn.textContent;
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = 'Đang upload...';
+                
+                try {
+                    await API.UserGames.uploadGame(gameData);
+                    alert('Game đã được upload! Game của bạn đang ở trạng thái CHỜ DUYỆT. Admin sẽ kiểm tra và phê duyệt trong vòng 24h.');
+                    
+                    // Reset form
+                    form.reset();
+                    
+                    // Reload my games tab
+                    loadMyGames();
+                    
+                    // Switch to my games tab
+                    document.querySelector('[data-tab="my-games"]').click();
+                } catch (err) {
+                    console.error('Error uploading game:', err);
+                    alert('Upload thất bại: ' + (err.message || 'Lỗi không xác định'));
+                } finally {
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = originalBtnText;
+                }
+            });
         }
     </script>
 </body>

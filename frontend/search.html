@@ -14,9 +14,9 @@
         <div class="header-container">
             <div class="logo">
                 <a href="index.html">
-                    <span class="logo-y">Y</span>
-                    <span class="logo-8">8</span>
-                    <span class="logo-com">.COM</span>
+                    <span class="logo-y">Game</span>
+                    <span class="logo-8">36</span>
+                    <span class="logo-com">h</span>
                 </a>
             </div>
             <div class="search-box">
@@ -34,15 +34,6 @@
             </div>
         </div>
     </header>
-
-    <!-- Navigation -->
-    <nav class="main-nav">
-        <div class="nav-container">
-            <ul class="nav-menu">
-                <li><a href="index.html">Trang chủ</a></li>
-            </ul>
-        </div>
-    </nav>
 
     <!-- Search Content -->
     <main class="main-content">
@@ -117,7 +108,7 @@
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-bottom">
-                <p>© 2024 Y8.COM - Chơi game trực tuyến miễn phí!</p>
+                <p>© 2024 Game36h - Chơi game trực tuyến miễn phí!</p>
             </div>
         </div>
     </footer>
@@ -144,12 +135,26 @@
         let currentPage = 1;
         let totalPages = 1;
         let categories = [];
+        let userFavorites = new Set(); // Store favorite game IDs
         let currentFilters = {
             q: '',
             category: '',
             sort: 'newest',
             limit: 12
         };
+
+        // Load user favorites
+        async function loadUserFavorites() {
+            if (!window.API.Auth.isLoggedIn()) return;
+            try {
+                const user = window.API.Auth.getCurrentUser();
+                const result = await window.API.Favorites.getUserFavorites(user.id);
+                const favorites = result.content || result.data || [];
+                userFavorites = new Set(favorites.map(fav => fav.gameId || fav.game?.id));
+            } catch (err) {
+                console.error('Error loading favorites:', err);
+            }
+        }
 
         // Initialize search page
         document.addEventListener('DOMContentLoaded', () => {
@@ -212,6 +217,9 @@
             const pagination = document.getElementById('pagination');
 
             showLoading(gamesGrid);
+
+            // Load favorites first if logged in
+            await loadUserFavorites();
 
             try {
                 let result;
@@ -428,7 +436,7 @@
 
         // Override createGameCard to use custom playGame
         function createGameCard(game) {
-            const isFavorite = game.is_favorite || false;
+            const isFavorite = userFavorites.has(game.id);
             
             return `
                 <div class="game-card ${game.featured ? 'featured' : ''}" data-game-id="${game.id}">
@@ -439,7 +447,8 @@
                         </div>
                         ${window.API.Auth.isLoggedIn() ? `
                             <button class="favorite-btn ${isFavorite ? 'active' : ''}" 
-                                    onclick="toggleFavorite(event, ${game.id})"
+                                    onclick="toggleFavorite(event, ${game.id}, this)"
+                                    data-game-id="${game.id}"
                                     title="${isFavorite ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">
                                 ❤️
                             </button>
@@ -454,6 +463,30 @@
                     </div>
                 </div>
             `;
+        }
+
+        async function toggleFavorite(event, gameId, btn) {
+            event.stopPropagation();
+            if (!window.API.Auth.isLoggedIn()) {
+                alert('Vui lòng đăng nhập để thêm vào yêu thích');
+                return;
+            }
+            try {
+                await window.API.Favorites.toggleFavorite(gameId);
+                // Toggle UI
+                btn.classList.toggle('active');
+                const isActive = btn.classList.contains('active');
+                btn.title = isActive ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích';
+                // Update cache
+                if (isActive) {
+                    userFavorites.add(gameId);
+                } else {
+                    userFavorites.delete(gameId);
+                }
+            } catch (err) {
+                console.error('Error toggling favorite:', err);
+                alert('Không thể thêm vào yêu thích');
+            }
         }
 
         async function playGame(gameId) {

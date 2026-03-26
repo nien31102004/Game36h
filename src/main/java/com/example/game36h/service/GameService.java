@@ -8,6 +8,7 @@ import com.example.game36h.entity.User;
 import com.example.game36h.repository.GameRepository;
 import com.example.game36h.repository.CategoryRepository;
 import com.example.game36h.repository.RatingRepository;
+import com.example.game36h.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,9 @@ public class GameService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private RatingRepository ratingRepository;
@@ -52,8 +56,8 @@ public class GameService {
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         game.setCategory(category);
 
-        User user = new User();
-        user.setId(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         game.setUser(user);
 
         Game savedGame = gameRepository.save(game);

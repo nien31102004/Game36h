@@ -6,6 +6,7 @@ import com.example.game36h.entity.Game;
 import com.example.game36h.entity.User;
 import com.example.game36h.repository.FavoriteRepository;
 import com.example.game36h.repository.GameRepository;
+import com.example.game36h.repository.RatingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,9 @@ public class FavoriteService {
 
     @Autowired
     private GameRepository gameRepository;
+
+    @Autowired
+    private RatingRepository ratingRepository;
 
     public Favorite toggleFavorite(Long gameId, Long userId) {
         Game game = gameRepository.findById(gameId)
@@ -71,10 +75,16 @@ public class FavoriteService {
         dto.setCreatedAt(favorite.getCreatedAt());
         
         if (favorite.getGame() != null) {
-            dto.setGameId(favorite.getGame().getId());
-            dto.setGameTitle(favorite.getGame().getTitle());
-            dto.setGameThumbnail(favorite.getGame().getThumbnail());
-            dto.setGameUrl(favorite.getGame().getGameUrl());
+            Game game = favorite.getGame();
+            dto.setGameId(game.getId());
+            dto.setGameTitle(game.getTitle());
+            dto.setGameThumbnail(game.getThumbnail());
+            dto.setGameUrl(game.getGameUrl());
+            dto.setViews(game.getViews());
+            
+            // Get average rating
+            Double avgRating = ratingRepository.getAverageRatingByGameId(game.getId());
+            dto.setAverageRating(avgRating != null ? avgRating : 0.0);
         }
         
         return dto;

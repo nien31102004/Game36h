@@ -152,18 +152,13 @@ const GamesAPI = {
 
     // Tăng lượt xem game
     async incrementViews(gameId) {
-        return apiCall(`/games/${gameId}/views`, 'POST');
+        return apiCall(`/games/${gameId}/play`, 'POST');
     }
 };
 
 // ==================== FAVORITES API ====================
 
 const FavoritesAPI = {
-    // Lấy danh sách yêu thích của user hiện tại
-    async getFavorites(page = 0, size = 10) {
-        const token = AuthAPI.getToken();
-        return apiCall(`/favorites?page=${page}&size=${size}`, 'GET', null, token);
-    },
 
     // Thêm vào yêu thích / Toggle favorite
     async toggleFavorite(gameId) {
@@ -234,10 +229,6 @@ const RatingsAPI = {
 
 const HistoryAPI = {
     // Lấy lịch sử chơi của user hiện tại
-    async getHistory(page = 0, size = 10) {
-        const token = AuthAPI.getToken();
-        return apiCall(`/history?page=${page}&size=${size}`, 'GET', null, token);
-    },
 
     // Thêm vào lịch sử
     async addToHistory(gameId) {
@@ -289,9 +280,17 @@ const UserGamesAPI = {
 
     // Upload game mới
     async uploadGame(gameData) {
-        // gameData: { title, description, category_id, game_url, thumbnail }
+        // gameData: { title, description, categoryId, gameUrl, thumbnail }
+        // Convert snake_case to camelCase for backend
+        const data = {
+            title: gameData.title,
+            description: gameData.description,
+            categoryId: gameData.category_id,
+            gameUrl: gameData.game_url,
+            thumbnail: gameData.thumbnail
+        };
         const token = AuthAPI.getToken();
-        return apiCall('/games', 'POST', gameData, token);
+        return apiCall('/games', 'POST', data, token);
     },
 
     // Upload file game (multipart/form-data)
