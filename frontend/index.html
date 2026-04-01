@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y8.COM - Chơi Game Trực Tuyến Miễn Phí</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html">
+                    <span class="logo-y">Game</span>
+                    <span class="logo-8">36</span>
+                    <span class="logo-com">h</span>
+                </a>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm game...">
+                <button class="search-btn" onclick="searchGames()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="header-actions">
+                <a href="login.html" class="btn-login">Đăng nhập</a>
+                <a href="register.html" class="btn-register">Đăng ký</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="main-content">
+
+        <!-- Hero -->
+        <section class="hero-section">
+            <h1>Chơi Game Trực Tuyến Miễn Phí</h1>
+            <p>Khám phá hàng ngàn game hấp dẫn!</p>
+        </section>
+
+        <!-- Categories -->
+        <section class="categories-section">
+            <div class="section-header">
+                <h2>Thể Loại Game</h2>
+            </div>
+
+            <div class="categories-grid" id="categoriesContainer">
+                <!-- JS render -->
+            </div>
+        </section>
+
+        <!-- Games -->
+        <section class="game-section">
+            <div class="section-header">
+                <h2>Danh Sách Game</h2>
+            </div>
+
+            <div class="games-grid" id="gamesContainer">
+                <!-- JS render -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-bottom">
+                <p>© 2024 Game36h - Chơi game trực tuyến miễn phí!</p>  
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="api.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            loadCategories();
+            loadGames();
+            updateHeaderActions();
+        });
+
+        // ================= AUTH UI =================
+        function updateHeaderActions() {
+            const headerActions = document.querySelector('.header-actions');
+            if (!headerActions) return;
+
+  if (API.Auth.isLoggedIn()) {
+                const user = API.Auth.getCurrentUser();
+                headerActions.innerHTML = `
+                    <a href="profile.html" class="user-avatar-link">
+                        <img src="${user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (user?.username || 'User')}" alt="Avatar" class="header-avatar">
+                    </a>
+                    <span class="username">${user?.username || 'User'}</span>
+                    <button class="btn-register" onclick="API.Auth.logout()">Đăng xuất</button>
+                `;
+            }
+        }
+
+        // === XỬ LÝ TÌM KIẾM ===
+        const searchInput = document.getElementById("searchInput");
+        const searchBtn = document.querySelector(".search-btn");
+
+        function performSearch() {
+            const keyword = searchInput.value.trim();
+            if (keyword) {
+                window.location.href = `search.html?q=${encodeURIComponent(keyword)}`;
+            }
+        }
+
+        // Click nút search
+        searchBtn.addEventListener("click", performSearch);
+
+        // Nhấn Enter trong ô input
+        searchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                performSearch();
+            }
+        });
+
+        // ================= CATEGORIES =================
+        async function loadCategories() {
+            try {
+                const categories = await API.Categories.getCategories();
+                const container = document.getElementById("categoriesContainer");
+
+                container.innerHTML = "";
+
+                categories.forEach(cat => {
+                    const el = document.createElement("div");
+                    el.className = "category-card";
+
+                    el.innerHTML = `
+                        <span class="category-icon">🎮</span>
+                        <span class="category-name">${cat.name}</span>
+                    `;
+
+                    el.onclick = () => loadGamesByCategory(cat.id);
+
+                    container.appendChild(el);
+                });
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // ================= GAMES =================
+        let userFavorites = new Set(); // Store favorite game IDs
+
+        async function loadUserFavorites() {
+            if (!API.Auth.isLoggedIn()) return;
+            try {
+                const user = API.Auth.getCurrentUser();
+                const result = await API.Favorites.getUserFavorites(user.id);
+                const favorites = result.content || result.data || [];
+                userFavorites = new Set(favorites.map(fav => fav.gameId || fav.game?.id));
+            } catch (err) {
+                console.error('Error loading favorites:', err);
+            }
+        }
+
+        async function loadGames() {
+            // Load favorites first if logged in
+            await loadUserFavorites();
+            try {
+                const games = await API.Games.getGames();
+                renderGames(games);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadGamesByCategory(categoryId) {
+            await loadUserFavorites();
+            try {
+                const games = await API.Games.getGamesByCategory(categoryId);
+                renderGames(games);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderGames(games) {
+            const container = document.getElementById("gamesContainer");
+            container.innerHTML = "";
+
+            // Handle Spring Page wrapper - extract content array
+            const gamesArray = games.content || games;
+
+            if (!gamesArray || gamesArray.length === 0) {
+                container.innerHTML = "<p>Không có game nào.</p>";
+                return;
+            }
+
+            gamesArray.forEach(game => {
+                const el = document.createElement("div");
+                el.className = "game-card";
+
+                const isFavorite = userFavorites.has(game.id);
+                
+                el.innerHTML = `
+                    <div class="game-thumb">
+                        <img src="${game.thumbnail || 'https://via.placeholder.com/300'}" alt="${game.title}">
+                        <div class="game-overlay">
+                            <button class="play-btn" onclick="playGame(${game.id})">Chơi ngay</button>
+                        </div>
+                        ${API.Auth.isLoggedIn() ? `
+                            <button class="favorite-btn ${isFavorite ? 'active' : ''}" 
+                                    onclick="toggleFavorite(event, ${game.id}, this)"
+                                    data-game-id="${game.id}"
+                                    title="${isFavorite ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">
+                                ❤️
+                            </button>
+                        ` : ''}
+                    </div>
+
+                    <div class="game-info">
+                        <h3 class="game-title">${game.title}</h3>
+                        <div class="game-meta">
+                            <span>⭐ ${game.averageRating || 0}</span>
+                            <span>👁 ${game.views || 0}</span>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(el);
+            });
+        }
+
+        async function playGame(gameId) {
+            // Add to history if logged in
+            if (API.Auth.isLoggedIn()) {
+                try {
+                    await API.History.addToHistory(gameId);
+                    console.log('Added to history');
+                } catch (err) {
+                    console.error('Failed to add history:', err);
+                }
+            }
+            
+            // Increment views
+            try {
+                await API.Games.incrementViews(gameId);
+            } catch (err) {
+                console.error('Failed to increment views:', err);
+            }
+            
+            window.location.href = `game.html?id=${gameId}`;
+        }
+
+        async function toggleFavorite(event, gameId, btn) {
+            event.stopPropagation();
+            if (!API.Auth.isLoggedIn()) {
+                alert('Vui lòng đăng nhập để thêm vào yêu thích');
+                return;
+            }
+            try {
+                await API.Favorites.toggleFavorite(gameId);
+                // Toggle UI
+                btn.classList.toggle('active');
+                const isActive = btn.classList.contains('active');
+                btn.title = isActive ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích';
+                // Update cache
+                if (isActive) {
+                    userFavorites.add(gameId);
+                } else {
+                    userFavorites.delete(gameId);
+                }
+            } catch (err) {
+                console.error('Error toggling favorite:', err);
+                alert('Không thể thêm vào yêu thích');
+            }
+        }
+    </script>
+
+</body>
+</html>

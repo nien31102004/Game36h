@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Game - Game36h</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="game-detail.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html">
+                    <span class="logo-y">Game</span>
+                    <span class="logo-8">36</span>
+                    <span class="logo-com">h</span>
+                </a>
+            </div>
+            <div class="search-box">
+                <input type="text" placeholder="Tìm kiếm game...">
+                <button class="search-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="header-actions">
+                <a href="login.html" class="btn-login">Đăng nhập</a>
+                <a href="register.html" class="btn-register">Đăng ký</a>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- Game Detail Content -->
+    <main class="main-content">
+        <div class="game-detail-container">
+            <!-- Game Player Section -->
+            <section class="game-player-section">
+                <div class="game-frame">
+                    <div class="game-placeholder">
+                        <div class="play-overlay">
+                            <button class="big-play-btn">▶ CHƠI NGAY</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="game-controls">
+                    <button class="control-btn favorite" id="favoriteBtn">
+                        <span>❤️</span> Yêu thích
+                    </button>
+                    <button class="control-btn share">
+                        <span>🔗</span> Chia sẻ
+                    </button>
+                    <button class="control-btn fullscreen" id="fullscreenBtn" onclick="toggleFullscreen()">
+                        <span>⛶</span> Toàn màn hình
+                    </button>
+                </div>
+            </section>
+
+            <!-- Game Info Section -->
+            <section class="game-info-section">
+                <div class="game-info-header">
+                    <div class="game-title-area">
+                        <h1>Fireboy and Watergirl</h1>
+                        <div class="game-meta-info">
+                            <span class="category-tag">Phiêu Lưu</span>
+                            <span class="status-tag active">Đang hoạt động</span>
+                        </div>
+                    </div>
+                    <div class="game-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">5.2M</span>
+                            <span class="stat-label">Lượt chơi</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">4.8</span>
+                            <span class="stat-label">Đánh giá</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">1.2K</span>
+                            <span class="stat-label">Bình luận</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-description">
+                    <h2>Mô tả</h2>
+                    <p>Fireboy and Watergirl là một trò chơi phiêu lưu coop 2 người chơi cổ điển. Hãy giúp Fireboy và Watergirl vượt qua các câu đố và thoát khỏi Đền Rừng. Sử dụng các phím mũi tên để điều khiển Fireboy và WASD để điều khiển Watergirl. Thu thập đá quý và đến lối ra!</p>
+                </div>
+
+                <!-- Rating Section -->
+                <div class="rating-section">
+                    <h2>Đánh giá của bạn</h2>
+                    <div class="star-rating" id="starRating">
+                        <span class="star" data-value="1">⭐</span>
+                        <span class="star" data-value="2">⭐</span>
+                        <span class="star" data-value="3">⭐</span>
+                        <span class="star" data-value="4">⭐</span>
+                        <span class="star" data-value="5">⭐</span>
+                    </div>
+                    <p class="rating-text">Chọn số sao để đánh giá</p>
+                </div>
+            </section>
+
+            <!-- Comments Section -->
+            <section class="comments-section">
+                <h2>Bình luận (1,234)</h2>
+                
+                <div class="comment-form">
+                    <div class="comment-avatar">
+                        <span>👤</span>
+                    </div>
+                    <div class="comment-input-wrapper">
+                        <textarea placeholder="Viết bình luận của bạn..." id="commentInput"></textarea>
+                        <button class="btn-submit-comment" onclick="submitComment()">Gửi</button>
+                    </div>
+                </div>
+
+                <div class="comments-list" id="commentsList">
+                    <div class="comment-item">
+                        <div class="comment-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Avatar">
+                        </div>
+                        <div class="comment-content">
+                            <div class="comment-header">
+                                <span class="comment-author">GameMaster_99</span>
+                                <span class="comment-time">2 giờ trước</span>
+                            </div>
+                            <p class="comment-text">Game hay quá! Mình và bạn thân chơi cả buổi chiều luôn. Các màn sau khó hơn nhiều nhưng rất thú vị!</p>
+                        </div>
+                    </div>
+                    <div class="comment-item">
+                        <div class="comment-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka" alt="Avatar">
+                        </div>
+                        <div class="comment-content">
+                            <div class="comment-header">
+                                <span class="comment-author">ProGamer_VN</span>
+                                <span class="comment-time">5 giờ trước</span>
+                            </div>
+                            <p class="comment-text">Tuyệt vời! Đồ họa đẹp, gameplay mượt. Mong có thêm nhiều level mới.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Related Games -->
+            <section class="related-games">
+                <h2>Game tương tự</h2>
+                <div class="games-grid">
+                    <div class="game-card">
+                        <div class="game-thumb">
+                            <div class="game-thumb-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                            <div class="game-overlay">
+                                <button class="play-btn">Chơi ngay</button>
+                            </div>
+                        </div>
+                        <div class="game-info">
+                            <h3 class="game-title">Temple Run 2</h3>
+                            <div class="game-meta">
+                                <span class="rating">⭐ 4.5</span>
+                                <span class="plays">👁 9.8M</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-card">
+                        <div class="game-thumb">
+                            <div class="game-thumb-placeholder" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                            <div class="game-overlay">
+                                <button class="play-btn">Chơi ngay</button>
+                            </div>
+                        </div>
+                        <div class="game-info">
+                            <h3 class="game-title">Subway Surfers</h3>
+                            <div class="game-meta">
+                                <span class="rating">⭐ 4.6</span>
+                                <span class="plays">👁 12M</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-card">
+                        <div class="game-thumb">
+                            <div class="game-thumb-placeholder" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                            <div class="game-overlay">
+                                <button class="play-btn">Chơi ngay</button>
+                            </div>
+                        </div>
+                        <div class="game-info">
+                            <h3 class="game-title">Slope Game</h3>
+                            <div class="game-meta">
+                                <span class="rating">⭐ 4.7</span>
+                                <span class="plays">👁 8.1M</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-card">
+                        <div class="game-thumb">
+                            <div class="game-thumb-placeholder" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
+                            <div class="game-overlay">
+                                <button class="play-btn">Chơi ngay</button>
+                            </div>
+                        </div>
+                        <div class="game-info">
+                            <h3 class="game-title">Stickman Hook</h3>
+                            <div class="game-meta">
+                                <span class="rating">⭐ 4.3</span>
+                                <span class="plays">👁 2.1M</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-bottom">
+                <p>© 2024 Game36h - Chơi game trực tuyến miễn phí!</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="api.js"></script>
+    <script src="main.js"></script>
+    <script>
+        // ================= AUTH UI =================
+        document.addEventListener('DOMContentLoaded', () => {
+            updateHeaderActions();
+        });
+
+        function updateHeaderActions() {
+            const headerActions = document.querySelector('.header-actions');
+            if (!headerActions) return;
+
+            if (API.Auth.isLoggedIn()) {
+                const user = API.Auth.getCurrentUser();
+                headerActions.innerHTML = `
+                    <a href="profile.html" class="user-avatar-link">
+                        <img src="${user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (user?.username || 'User')}" alt="Avatar" class="header-avatar">
+                    </a>
+                    <span class="username">${user?.username || 'User'}</span>
+                    <button class="btn-register" onclick="API.Auth.logout()">Đăng xuất</button>
+                `;
+            }
+        }
+
+        // Star rating
+        const stars = document.querySelectorAll('.star');
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const value = this.dataset.value;
+                stars.forEach((s, index) => {
+                    if (index < value) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+                document.querySelector('.rating-text').textContent = `Bạn đã đánh giá ${value} sao`;
+                
+                // Submit rating to API
+                const urlParams = new URLSearchParams(window.location.search);
+                const gameId = urlParams.get('id');
+                if (gameId) {
+                    submitRating(gameId, parseInt(value));
+                }
+            });
+        });
+
+        // Big play button - add to history and play
+        document.querySelector('.big-play-btn').addEventListener('click', async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('id');
+            
+            if (!gameId) return;
+            
+            // Add to history if logged in
+            if (API.Auth.isLoggedIn()) {
+                try {
+                    await API.History.addToHistory(gameId);
+                    console.log('Added to history');
+                } catch (err) {
+                    console.error('Failed to add history:', err);
+                }
+            }
+            
+            // TODO: Load and play the actual game
+            // For now, show placeholder
+            alert('Đang tải game... (Game ID: ' + gameId + ')');
+            
+            // Increment views
+            try {
+                await API.Games.incrementViews(gameId);
+            } catch (err) {
+                console.error('Failed to increment views:', err);
+            }
+        });
+
+        // Favorite button
+        document.getElementById('favoriteBtn').addEventListener('click', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('id');
+            if (gameId) {
+                toggleGameFavorite(gameId, this);
+            }
+        });
+
+        // Submit comment
+        function submitComment() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('id');
+            if (gameId) {
+                window.submitComment(gameId);
+            }
+        }
+
+        // Fullscreen toggle
+        function toggleFullscreen() {
+            const gameFrame = document.querySelector('.game-frame');
+            const btn = document.getElementById('fullscreenBtn');
+            
+            if (!document.fullscreenElement) {
+                if (gameFrame.requestFullscreen) {
+                    gameFrame.requestFullscreen();
+                } else if (gameFrame.webkitRequestFullscreen) {
+                    gameFrame.webkitRequestFullscreen();
+                } else if (gameFrame.msRequestFullscreen) {
+                    gameFrame.msRequestFullscreen();
+                }
+                btn.innerHTML = '<span>⛶</span> Thoát toàn màn hình';
+                gameFrame.classList.add('fullscreen-active');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                btn.innerHTML = '<span>⛶</span> Toàn màn hình';
+                gameFrame.classList.remove('fullscreen-active');
+            }
+        }
+
+        // Listen for fullscreen change
+        document.addEventListener('fullscreenchange', () => {
+            const gameFrame = document.querySelector('.game-frame');
+            const btn = document.getElementById('fullscreenBtn');
+            if (!document.fullscreenElement) {
+                btn.innerHTML = '<span>⛶</span> Toàn màn hình';
+                gameFrame.classList.remove('fullscreen-active');
+            }
+        });
+    </script>
+</body>
+</html>
