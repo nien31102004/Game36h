@@ -61,7 +61,7 @@
                     <button class="control-btn favorite" id="favoriteBtn">
                         <span>❤️</span> Yêu thích
                     </button>
-                    <button class="control-btn share">
+                    <button class="control-btn share" onclick="shareGame()">
                         <span>🔗</span> Chia sẻ
                     </button>
                     <button class="control-btn fullscreen" id="fullscreenBtn" onclick="toggleFullscreen()">
@@ -139,6 +139,10 @@
     <script>
         // ================= PAGE INIT =================
         document.addEventListener('DOMContentLoaded', () => {
+            if (!window.API) {
+                console.error('API not loaded');
+                return;
+            }
             const urlParams = new URLSearchParams(window.location.search);
             const gameId = urlParams.get('id');
 
@@ -190,7 +194,36 @@
                 const favBtn = document.getElementById('favoriteBtn');
                 if (window.API.Auth.isLoggedIn()) {
                     document.getElementById('commentFormContainer').style.display = 'block';
+                    
+                    // Load favorite status
+                    try {
+                        const favoritesResponse = await window.API.Favorites.getFavorites(); 
+                        const gameIdNum = parseInt(gameId);
+                        
+                        // Handle both Page object and array response
+                        const favorites = favoritesResponse.content || favoritesResponse;
+                        const isFavorited = favorites && Array.isArray(favorites) && favorites.some(f => {
+                            const fGameId = typeof f.gameId === 'string' ? parseInt(f.gameId) : f.gameId;
+                            return fGameId === gameIdNum;
+                        });
+                        
+                        if (isFavorited) {
+                            favBtn.classList.add('active');
+                            favBtn.innerHTML = '<span>❤️</span> Đã thích';
+                        }
+                        console.log('Favorite status loaded:', isFavorited, 'GameId:', gameIdNum, 'Favorites:', favorites);
+                    } catch (err) {
+                        console.error('Error loading favorite status:', err);
+                    }
+                    
+                    // Setup click handlers
                     favBtn.onclick = () => toggleFavorite(gameId);
+                    
+                    // Setup comment submit button
+                    const commentBtn = document.querySelector('.btn-submit-comment');
+                    if (commentBtn) {
+                        commentBtn.onclick = () => submitComment(gameId);
+                    }
                 }
 
                 // Increment views
@@ -202,13 +235,29 @@
 
                 // Load comments if available
                 try {
-                    const comments = await window.API.Comments.getComments(gameId);
+                    const commentsResponse = await window.API.Comments.getComments(gameId);
+                    const comments = commentsResponse.content || commentsResponse;
                     if (comments && comments.length > 0) {
                         renderComments(comments);
                     }
                 } catch (err) {
                     console.error('Error loading comments:', err);
                 }
+
+                // Load user rating if logged in
+                if (window.API.Auth.isLoggedIn()) {
+                    try {
+                        const ratings = await window.API.Ratings.getGameRatings(gameId);
+                        const user = window.API.Auth.getCurrentUser();
+                        const userRating = ratings.ratings.find(r => r.user.id === user.id);
+                        if (userRating) {
+                            setUserRating(userRating.score);
+                        }
+                    } catch (err) {
+                        console.error('Error loading user rating:', err);
+                    }
+                }
+                
 
             } catch (error) {
                 console.error('Error loading game detail:', error);
@@ -225,6 +274,11 @@
                     const value = this.dataset.value;
                     const gameId = new URLSearchParams(window.location.search).get('id');
                     
+                    if (!window.API.Auth.isLoggedIn()) {
+                        window.location.href = `login.html?redirect=game.html?id=${gameId}`;
+                        return;
+                    }
+                    
                     stars.forEach((s, index) => {
                         if (index < value) {
                             s.classList.add('active');
@@ -234,28 +288,29 @@
                     });
                     document.querySelector('.rating-text').textContent = `Bạn đã đánh giá ${value} sao`;
                     
-                    if (gameId && window.API.Auth.isLoggedIn()) {
-                        submitRating(gameId, parseInt(value));
-                    }
+                    submitRating(gameId, parseInt(value));
                 });
             });
         });
 
         // ================= FAVORITE =================
         async function toggleFavorite(gameId) {
+            const favBtn = document.getElementById('favoriteBtn');
+            const isActive = favBtn.classList.contains('active');
             try {
-                const favBtn = document.getElementById('favoriteBtn');
-                const isActive = favBtn.classList.contains('active');
-
                 if (isActive) {
+                    // Nếu đang active -> Bấm vào để xóa
                     await window.API.Favorites.removeFavorite(gameId);
                     favBtn.classList.remove('active');
                     favBtn.innerHTML = '<span>🤍</span> Yêu thích';
+                    showSuccess('Đã xóa khỏi danh sách yêu thích');
                 } else {
-                    await window.API.Favorites.toggleFavorite(gameId);
+                    // Nếu chưa active -> Bấm vào để thêm
+                    await window.API.Favorites.toggleFavorite(gameId); 
                     favBtn.classList.add('active');
                     favBtn.innerHTML = '<span>❤️</span> Đã thích';
-                }
+                    showSuccess('Đã thêm vào yêu thích!');
+                        }
             } catch (err) {
                 console.error('Error toggling favorite:', err);
                 alert('Vui lòng đăng nhập để thêm yêu thích');
@@ -263,15 +318,71 @@
         }
 
         // ================= COMMENTS =================
-        function renderComments(comments) {
-            const container = document.getElementById('commentsList');
-            if (comments.length === 0) {
-                container.innerHTML = '<p>Chưa có bình luận nào</p>';
+        async function submitComment(gameId) {
+            const content = document.getElementById('commentInput').value.trim();
+
+            if (!content) {
+                alert('Vui lòng nhập nội dung bình luận');
                 return;
             }
 
-            container.innerHTML = comments.map(comment => `
-                <div class="comment-item">
+            try {
+                console.log('Submitting comment:', { gameId, content });
+                await window.API.Comments.addComment(gameId, content);
+                document.getElementById('commentInput').value = '';
+                showSuccess('Bình luận đã được gửi!');
+                
+                // Reload comments
+                const commentsResponse = await window.API.Comments.getComments(gameId);
+                renderComments(commentsResponse.content || commentsResponse);
+            } catch (err) {
+                console.error('Error submitting comment:', err);
+                showError('Lỗi khi gửi bình luận: ' + err.message);
+            }
+        }
+
+        async function submitRating(gameId, score) {
+            try {
+                await window.API.Ratings.rateGame(gameId, score);
+                setUserRating(score);
+                showSuccess(`Bạn đã đánh giá game này ${score} sao`);
+            } catch (err) {
+                console.error('Error submitting rating:', err);
+                showError('Không thể lưu đánh giá. Bạn có thể đã đánh giá game này rồi.');
+            }
+        }
+
+        function setUserRating(score) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < score) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+            document.querySelector('.rating-text').textContent = `Bạn đã đánh giá ${score} sao`;
+        }
+
+        function renderComments(comments) {
+            const container = document.getElementById('commentsList');
+            if (!container) return;
+            
+            // Ensure comments is an array
+            let commentArray = [];
+            if (Array.isArray(comments)) {
+                commentArray = comments;
+            } else if (comments && comments.content) {
+                commentArray = comments.content;
+            }
+            
+            if (!commentArray || commentArray.length === 0) {
+                container.innerHTML = '<p>Chưa có bình luận nào</p>';
+                return;
+            }
+            
+            container.innerHTML = commentArray.map(comment => `
+                <div class="comment-item" data-comment-id="${comment.id}">
                     <div class="comment-avatar">
                         <img src="${comment.user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (comment.user?.username || 'User')}" alt="Avatar">
                     </div>
@@ -281,40 +392,94 @@
                             <span class="comment-time">${formatDate(comment.createdAt)}</span>
                         </div>
                         <p class="comment-text">${comment.content}</p>
+                        
+                        <!-- Reply Form -->
+                        <div class="reply-form" id="reply-form-${comment.id}" style="display: none;">
+                            <textarea class="reply-input" placeholder="Viết trả lời..." id="reply-input-${comment.id}"></textarea>
+                            <div class="reply-actions">
+                                <button class="btn-cancel-reply" onclick="toggleReplyForm(${comment.id})">Bỏ</button>
+                                <button class="btn-submit-reply" onclick="submitReply(${comment.id})">Gửi</button>
+                            </div>
+                        </div>
+
+                        <!-- Replies List -->
+                        <div class="replies-list" id="replies-${comment.id}">
+                            ${comment.replies && comment.replies.length > 0 ? comment.replies.map(reply => `
+                                <div class="reply-item">
+                                    <div class="reply-avatar">
+                                        <img src="${reply.user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (reply.user?.username || 'User')}" alt="Avatar">
+                                    </div>
+                                    <div class="reply-content">
+                                        <div class="reply-header">
+                                            <span class="reply-author">${reply.user?.username || 'Anonymous'}</span>
+                                            <span class="reply-time">${formatDate(reply.createdAt)}</span>
+                                        </div>
+                                        <p class="reply-text">${reply.content}</p>
+                                    </div>
+                                </div>
+                            `).join('') : ''}
+                        </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        async function submitComment() {
-            const gameId = new URLSearchParams(window.location.search).get('id');
-            const content = document.getElementById('commentInput').value.trim();
+        function toggleReplyForm(commentId) {
+            const form = document.getElementById(`reply-form-${commentId}`);
+            if (form) {
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                if (form.style.display === 'block') {
+                    document.getElementById(`reply-input-${commentId}`).focus();
+                }
+            }
+        }
+
+        async function submitReply(commentId) {
+            const input = document.getElementById(`reply-input-${commentId}`);
+            const content = input.value.trim();
 
             if (!content) {
-                alert('Vui lòng nhập nội dung bình luận');
+                alert('Vui lòng nhập nội dung trả lời');
+                return;
+            }
+
+            if (!window.API.Auth.isLoggedIn()) {
+                window.location.href = 'login.html?redirect=' + window.location.href;
                 return;
             }
 
             try {
-                await window.API.Comments.addComment(gameId, { content });
-                document.getElementById('commentInput').value = '';
-                alert('Bình luận đã được gửi');
+                await window.API.Comments.addReply(commentId, content);
+                input.value = '';
+                toggleReplyForm(commentId);
                 
-                // Reload comments
-                const comments = await window.API.Comments.getComments(gameId);
-                renderComments(comments);
+                // Reload comments to show new reply
+                const gameId = new URLSearchParams(window.location.search).get('id');
+                const commentsResponse = await window.API.Comments.getComments(gameId);
+                renderComments(commentsResponse.content || commentsResponse);
+                
+                showSuccess('Trả lời đã được gửi!');
             } catch (err) {
-                console.error('Error submitting comment:', err);
-                alert('Lỗi khi gửi bình luận');
+                console.error('Error submitting reply:', err);
+                showError('Lỗi gửi trả lời: ' + err.message);
             }
         }
 
-        async function submitRating(gameId, score) {
-            try {
-                await window.API.Ratings.rateGame(gameId, score);
-            } catch (err) {
-                console.error('Error submitting rating:', err);
-            }
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = (now - date) / 1000;
+
+            if (diff < 60) return 'Vừa xong';
+            if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+            if (diff < 604800) return `${Math.floor(diff / 86400)} ngày trước`;
+            
+            return date.toLocaleDateString('vi-VN', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
         }
 
         // ================= UI HELPERS =================
@@ -341,6 +506,105 @@
             }
         }
 
+        function shareGame() {
+            const gameId = new URLSearchParams(window.location.search).get('id');
+            const gameTitle = document.getElementById('gameTitle').textContent;
+            const shareUrl = `${window.location.origin}${window.location.pathname}?id=${gameId}`;
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                showSuccess(`Đã sao chép link: ${shareUrl}`);
+            }).catch(() => {
+                // Fallback for browsers that don't support async clipboard API
+                const textArea = document.createElement('textarea');
+                textArea.value = shareUrl;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showSuccess(`Đã sao chép link: ${shareUrl}`);
+            });
+        }
+
+        function showSuccess(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast success';
+            toast.innerHTML = `✅ ${message}`;
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        function showError(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast error';
+            toast.innerHTML = `❌ ${message}`;
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
         function toggleFullscreen() {
             const gameFrame = document.querySelector('.game-frame');
             const btn = document.getElementById('fullscreenBtn');
@@ -364,23 +628,6 @@
                 return (num / 1000).toFixed(1) + 'K';
             }
             return num.toString();
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diff = (now - date) / 1000;
-
-            if (diff < 60) return 'Vừa xong';
-            if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
-            if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
-            if (diff < 604800) return `${Math.floor(diff / 86400)} ngày trước`;
-            
-            return date.toLocaleDateString('vi-VN', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-            });
         }
     </script>
 </body>

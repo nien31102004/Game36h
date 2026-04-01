@@ -115,11 +115,10 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="gameCategory">Thể loại *</label>
-                        <select id="gameCategory" name="category_id" required>
-                            <option value="">Chọn thể loại</option>
+                        <label>Thể loại *</label>
+                        <div class="category-checkboxes" id="gameCategoryCheckboxes">
                             <!-- Categories will be loaded dynamically -->
-                        </select>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -207,11 +206,10 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="editGameCategory">Thể loại *</label>
-                        <select id="editGameCategory" name="category_id" required>
-                            <option value="">Chọn thể loại</option>
+                        <label>Thể loại *</label>
+                        <div class="category-checkboxes" id="editGameCategoryCheckboxes">
                             <!-- Categories will be loaded dynamically -->
-                        </select>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -225,12 +223,17 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="button" class="btn-cancel" onclick="closeEditModal()">
-                            Hủy
+                        <button type="button" class="btn-delete" id="deleteGameBtn" onclick="deleteFromEdit()" style="margin-right: auto;">
+                            <span>🗑️</span> Xóa game
                         </button>
-                        <button type="submit" class="btn-submit" id="submitEditBtn">
-                            <span>💾</span> Lưu thay đổi
-                        </button>
+                        <div>
+                            <button type="button" class="btn-cancel" onclick="closeEditModal()">
+                                Hủy
+                            </button>
+                            <button type="submit" class="btn-submit" id="submitEditBtn">
+                                <span>💾</span> Lưu thay đổi
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -392,20 +395,18 @@ async function loadCategories() {
         const result = await window.API.Categories.getCategories();
         categories = result || [];
 
-        const populate = (id) => {
-            const select = document.getElementById(id);
-            select.innerHTML = '<option value="">Chọn thể loại</option>';
-
-            categories.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.id;
-                opt.textContent = c.name;
-                select.appendChild(opt);
-            });
+        const populateCheckboxes = (containerId) => {
+            const container = document.getElementById(containerId);
+            container.innerHTML = categories.map(c => `
+                <div class="checkbox-item">
+                    <input type="checkbox" name="categories" value="${c.id}" id="cat_${c.id}">
+                    <label for="cat_${c.id}">${c.name}</label>
+                </div>
+            `).join('');
         };
 
-        populate('gameCategory');
-        populate('editGameCategory');
+        populateCheckboxes('gameCategoryCheckboxes');
+        populateCheckboxes('editGameCategoryCheckboxes');
     } catch (e) {
         console.error(e);
     }
@@ -416,6 +417,13 @@ async function handleUpload(e) {
     e.preventDefault();
 
     try {
+        // Validate at least one category is selected
+        const selectedCategories = document.querySelectorAll('#gameCategoryCheckboxes input[type="checkbox"]:checked');
+        if (selectedCategories.length === 0) {
+            showToast('Vui lòng chọn ít nhất 1 thể loại', 'error');
+            return;
+        }
+
         const formData = new FormData(e.target);
 
         await window.API.UserGames.uploadGameFile(formData);
@@ -423,8 +431,14 @@ async function handleUpload(e) {
         showToast('Upload thành công', 'success');
         closeUploadModal();
         loadMyGames();
+        
+        // Reset form
+        e.target.reset();
+        // Uncheck all categories
+        document.querySelectorAll('#gameCategoryCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
     } catch (err) {
-        showToast('Upload thất bại', 'error');
+        console.error(err);
+        showToast('Upload thất bại: ' + err.message, 'error');
     }
 }
 
@@ -435,9 +449,20 @@ function openEditModal(id) {
 
     document.getElementById('editGameId').value = game.id;
     document.getElementById('editGameTitle').value = game.title;
-    document.getElementById('editGameCategory').value = game.category?.id || '';
     document.getElementById('editGameDescription').value = game.description || '';
     document.getElementById('editGameUrl').value = game.gameUrl || '';
+
+    // Uncheck all categories first
+    const checkboxes = document.querySelectorAll('#editGameCategoryCheckboxes input[type="checkbox"]');
+    checkboxes.forEach(cb => cb.checked = false);
+
+    // Check current categories
+    if (game.category) {
+        const categoryCheckbox = document.querySelector(`#editGameCategoryCheckboxes input[value="${game.category.id}"]`);
+        if (categoryCheckbox) {
+            categoryCheckbox.checked = true;
+        }
+    }
 
     document.getElementById('editModal').style.display = 'flex';
 }
@@ -448,11 +473,20 @@ async function handleEdit(e) {
     try {
         const id = parseInt(document.getElementById('editGameId').value);
 
+        // Get selected categories
+        const categoryCheckboxes = document.querySelectorAll('#editGameCategoryCheckboxes input[type="checkbox"]:checked');
+        const categoryIds = Array.from(categoryCheckboxes).map(cb => parseInt(cb.value));
+
+        if (categoryIds.length === 0) {
+            showToast('Vui lòng chọn ít nhất 1 thể loại', 'error');
+            return;
+        }
+
         const data = {
             title: document.getElementById('editGameTitle').value,
-            category_id: parseInt(document.getElementById('editGameCategory').value),
+            categoryIds: categoryIds,  // Send as array
             description: document.getElementById('editGameDescription').value,
-            game_url: document.getElementById('editGameUrl').value
+            gameUrl: document.getElementById('editGameUrl').value
         };
 
         await window.API.UserGames.updateGame(id, data);
@@ -461,11 +495,17 @@ async function handleEdit(e) {
         closeEditModal();
         loadMyGames();
     } catch (e) {
-        showToast('Lỗi update', 'error');
+        console.error(e);
+        showToast('Lỗi update: ' + e.message, 'error');
     }
 }
 
 // ================= DELETE =================
+function deleteFromEdit() {
+    const gameId = parseInt(document.getElementById('editGameId').value);
+    openDeleteModal(gameId);
+}
+
 function openDeleteModal(id) {
     const game = myGames.find(g => g.id === id);
     deleteGameId = id;

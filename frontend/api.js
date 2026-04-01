@@ -199,6 +199,14 @@ const FavoritesAPI = {
         return apiCall(`/favorites/by-id/${favoriteId}`, 'GET', null, token);
     },
 
+    // Lấy danh sách yêu thích của user hiện tại
+    async getFavorites(page = 0, size = 100) {
+        const token = AuthAPI.getToken();
+        const user = AuthAPI.getCurrentUser();
+        if (!user) return [];
+        return apiCall(`/favorites/user/${user.id}?page=${page}&size=${size}`, 'GET', null, token);
+    },
+
     // Lấy danh sách yêu thích của user theo userId
     async getUserFavorites(userId, page = 0, size = 10) {
         const token = AuthAPI.getToken();
@@ -219,7 +227,7 @@ const RatingsAPI = {
     async rateGame(gameId, score) {
         // score: 1-5
         const token = AuthAPI.getToken();
-        return apiCall('/ratings', 'POST', { game_id: gameId, score }, token);
+        return apiCall('/ratings', 'POST', { gameId: gameId, score }, token);
     },
 
     // Cập nhật đánh giá
@@ -237,6 +245,55 @@ const RatingsAPI = {
     // Lấy đánh giá trung bình của game
     async getGameRating(gameId) {
         return apiCall(`/games/${gameId}/rating`);
+    },
+
+    // Lấy tất cả đánh giá của game
+    async getGameRatings(gameId) {
+        return apiCall(`/games/${gameId}/ratings`);
+    }
+};
+
+// ==================== COMMENTS API ====================
+
+const CommentsAPI = {
+    // Lấy bình luận của game
+    async getComments(gameId, page = 0, size = 10) {
+        return apiCall(`/games/${gameId}/comments?page=${page}&size=${size}`);
+    },
+
+    // Thêm bình luận mới
+    async addComment(gameId, content) {
+        const token = AuthAPI.getToken();
+        return apiCall('/comments', 'POST', { gameId: gameId, content }, token);
+    },
+
+    // Cập nhật bình luận
+    async updateComment(commentId, content) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/comments/${commentId}`, 'PUT', { content }, token);
+    },
+
+    // Xóa bình luận
+    async deleteComment(commentId) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/comments/${commentId}`, 'DELETE', null, token);
+    },
+
+    // Thêm reply cho bình luận
+    async addReply(commentId, content) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/comments/${commentId}/replies`, 'POST', { content }, token);
+    },
+
+    // Lấy replies của bình luận
+    async getReplies(commentId) {
+        return apiCall(`/comments/${commentId}/replies`);
+    },
+
+    // Xóa reply
+    async deleteReply(replyId) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/comments/replies/${replyId}`, 'DELETE', null, token);
     }
 };
 
@@ -412,9 +469,12 @@ window.API = {
     Games: GamesAPI,
     Favorites: FavoritesAPI,
     Ratings: RatingsAPI,
+    Comments: CommentsAPI,
     History: HistoryAPI,
     Categories: CategoriesAPI,
     Notifications: NotificationsAPI,
     UserGames: UserGamesAPI,
     baseUrl: API_BASE_URL
 };
+
+console.log('API loaded', window.API);
