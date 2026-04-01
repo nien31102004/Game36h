@@ -277,65 +277,146 @@ async function searchGames(query) {
 
 // ==================== GAME DETAIL ====================
 
+function getLocalGameById(gameId) {
+    if (!window.GAMES_DATA) return null;
+    const raw = window.GAMES_DATA[gameId];
+    if (!raw) return null;
+    return { id: gameId, ...raw };
+}
+
 // Load game details
 async function loadGameDetail(gameId) {
+    const localGame = getLocalGameById(gameId);
+    let game = null;
+    let comments = [];
+
+    if (localGame && isNaN(Number(gameId))) {
+        // Nếu gameId là slug (chuỗi) và có trong data.js, không gọi backend API ID numeric.
+        game = localGame;
+    }
+
     try {
-        const [gameResult, commentsResult] = await Promise.all([
-            window.API.Games.getGameById(gameId),
-            window.API.Comments.getComments(gameId)
-        ]);
-        
-        const game = gameResult.data || gameResult;
-        const comments = commentsResult.data || commentsResult.comments || [];
-        
+        if (!game) {
+            const [gameResult, commentsResult] = await Promise.all([
+                window.API.Games.getGameById(gameId),
+                window.API.Comments.getComments(gameId)
+            ]);
+
+            game = gameResult?.data || gameResult;
+            comments = commentsResult?.data || commentsResult?.comments || [];
+        } else {
+            comments = [];
+        }
+
+        if (!game) {
+            throw new Error('Game not found');
+        }
+
         // Update page title
         document.title = `${game.title} - Y8.COM`;
-        
-        // Update game info
-        document.querySelector('.game-title-area h1').textContent = game.title;
-        document.querySelector('.category-tag').textContent = game.category?.name || 'Game';
-        document.querySelector('.stat-value').textContent = formatNumber(game.views || 0);
-        document.querySelector('.game-description p').textContent = game.description || '';
-        
+
+        const titleElem = document.querySelector('.game-title-area h1');
+        const categoryElem = document.querySelector('.category-tag');
+        const statsElem = document.querySelector('.stat-value');
+        const descElem = document.querySelector('.game-description p');
+        const iframe = document.getElementById('gameIframe');
+        const placeholder = document.getElementById('gamePlaceholder');
+
+        if (titleElem) titleElem.textContent = game.title || 'Game';
+        if (categoryElem) categoryElem.textContent = game.category || 'Game';
+        if (statsElem) statsElem.textContent = formatNumber(game.views || 0);
+        if (descElem) descElem.textContent = game.description || '';
+        if (iframe && game.iframeUrl) iframe.src = game.iframeUrl;
+        if (iframe) iframe.style.display = 'none';
+        if (placeholder) placeholder.style.display = 'flex';
+
         // Update play button
-        document.querySelector('.big-play-btn').onclick = () => playGame(game.game_url);
-        
-        // Update favorite button
-        if (window.API.Auth.isLoggedIn()) {
-            // Check if game is in favorites by trying to get user favorites and checking
-            try {
-                const favoritesResult = await window.API.Favorites.getFavorites();
-                const favorites = favoritesResult.content || favoritesResult.data || favoritesResult || [];
-                const isFavorited = favorites.some(fav => (fav.game?.id || fav.gameId) == gameId);
-                
-                const favBtn = document.getElementById('favoriteBtn');
-                if (isFavorited) {
-                    favBtn.classList.add('active');
-                    favBtn.innerHTML = '<span>❤️</span> Đã thích';
-                } else {
-                    favBtn.innerHTML = '<span>🤍</span> Yêu thích';
+        const bigPlayBtn = document.querySelector('.big-play-btn');
+        if (bigPlayBtn) {
+            bigPlayBtn.onclick = () => {
+                if (iframe) {
+                    placeholder.style.display = 'none';
+                    iframe.style.display = 'block';
                 }
-                favBtn.onclick = () => toggleGameFavorite(gameId, favBtn);
-            } catch (error) {
-                console.error('Error checking favorite status:', error);
-                const favBtn = document.getElementById('favoriteBtn');
-                favBtn.innerHTML = '<span>🤍</span> Yêu thích';
-                favBtn.onclick = () => toggleGameFavorite(gameId, favBtn);
-            }
+            };
         }
-        
-        // Load comments
-        loadCommentsList(comments);
-        
-        // Increment views
-        window.API.Games.incrementViews(gameId);
-        
+
+        // Update favorite button
+        const favBtn = document.getElementById('favoriteBtn');
+        if (favBtn) {
+            favBtn.onclick = () => toggleGameFavorite(gameId, favBtn);
+            favBtn.innerHTML = window.API.Auth.isLoggedIn() ? '<span>🤍</span> Yêu thích' : '<span>🤍</span> Yêu thích';
+        }
+
+        // Load comments list from backend if available
+        if (comments.length > 0) {
+            loadCommentsList(comments);
+        } else {
+            loadCommentsList([]);
+        }
+
+        // Tăng lượt xem nếu dùng backend numeric id
+        if (!isNaN(Number(gameId))) {
+            window.API.Games.incrementViews(gameId).catch(() => {});
+        }
+
     } catch (error) {
         console.error('Error loading game:', error);
-        document.querySelector('.game-detail-container').innerHTML = 
-            '<div class="error-message">Không thể tải thông tin game</div>';
+        const container = document.querySelector('.game-detail-container');
+        if (container) {
+            container.innerHTML = '<div class="error-message">Không thể tải thông tin game</div>';
+        }
     }
 }
+        
+//         // Update page title
+//         document.title = `${game.title} - Y8.COM`;
+        
+//         // Update game info
+//         document.querySelector('.game-title-area h1').textContent = game.title;
+//         document.querySelector('.category-tag').textContent = game.category?.name || 'Game';
+//         document.querySelector('.stat-value').textContent = formatNumber(game.views || 0);
+//         document.querySelector('.game-description p').textContent = game.description || '';
+        
+//         // Update play button
+//         document.querySelector('.big-play-btn').onclick = () => playGame(game.game_url);
+        
+//         // Update favorite button
+//         if (window.API.Auth.isLoggedIn()) {
+//             // Check if game is in favorites by trying to get user favorites and checking
+//             try {
+//                 const favoritesResult = await window.API.Favorites.getFavorites();
+//                 const favorites = favoritesResult.content || favoritesResult.data || favoritesResult || [];
+//                 const isFavorited = favorites.some(fav => (fav.game?.id || fav.gameId) == gameId);
+                
+//                 const favBtn = document.getElementById('favoriteBtn');
+//                 if (isFavorited) {
+//                     favBtn.classList.add('active');
+//                     favBtn.innerHTML = '<span>❤️</span> Đã thích';
+//                 } else {
+//                     favBtn.innerHTML = '<span>🤍</span> Yêu thích';
+//                 }
+//                 favBtn.onclick = () => toggleGameFavorite(gameId, favBtn);
+//             } catch (error) {
+//                 console.error('Error checking favorite status:', error);
+//                 const favBtn = document.getElementById('favoriteBtn');
+//                 favBtn.innerHTML = '<span>🤍</span> Yêu thích';
+//                 favBtn.onclick = () => toggleGameFavorite(gameId, favBtn);
+//             }
+//         }
+        
+//         // Load comments
+//         loadCommentsList(comments);
+        
+//         // Increment views
+//         window.API.Games.incrementViews(gameId);
+        
+//     } catch (error) {
+//         console.error('Error loading game:', error);
+//         document.querySelector('.game-detail-container').innerHTML = 
+//             '<div class="error-message">Không thể tải thông tin game</div>';
+//     }
+// }
 
 // Play game
 function playGame(gameUrl) {
@@ -579,6 +660,7 @@ async function updateProfileSettings(e) {
 document.addEventListener('DOMContentLoaded', () => {
     // Update header for all pages
     updateHeader();
+    renderGames();
     
     // Page-specific initialization
     const currentPage = window.location.pathname.split('/').pop();
@@ -602,6 +684,37 @@ document.addEventListener('DOMContentLoaded', () => {
             break;
     }
 });
+
+function renderGames() {
+    const container = document.getElementById('gamesContainer');
+    if (!container) return;
+
+    // Xóa nội dung cũ (nếu có)
+    container.innerHTML = '';
+
+    // Duyệt qua từng game trong GAMES_DATA (từ file data.js)
+    Object.keys(GAMES_DATA).forEach(key => {
+        const game = GAMES_DATA[key];
+        
+        // Tạo cấu trúc HTML cho mỗi card
+        const gameCard = `
+            <div class="game-card">
+                <a href="game.html?id=${key}">
+                    <div class="game-thumb">
+                        <img src="${game.thumb}" alt="${game.title}">
+                    </div>
+                    <div class="game-info">
+                        <h3 class="game-title">${game.title}</h3>
+                        <div class="game-meta">⭐ ${game.rating} | 👁 ${game.views}</div>
+                    </div>
+                </a>
+            </div>
+        `;
+        
+        // Thêm vào container
+        container.innerHTML += gameCard;
+    });
+}
 
 function initHomePage() {
     // Load featured games

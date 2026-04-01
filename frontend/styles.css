@@ -122,6 +122,31 @@ ul {
     gap: 12px;
 }
 
+.header-categories {
+    width: 100%;
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.header-category-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.header-category-btn:hover {
+    background: rgba(76, 175, 80, 0.4);
+    border-color: #4CAF50;
+    color: #fff;
+}
+
 .btn-login, .btn-register {
     padding: 10px 24px;
     border-radius: 25px;
@@ -283,12 +308,13 @@ ul {
 /* Games Grid */
 .games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;
 }
 
 /* Game Card */
 .game-card {
+    width: 100%;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 15px;
     overflow: hidden;
@@ -310,8 +336,19 @@ ul {
 .game-thumb {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 9;
     overflow: hidden;
+    border-radius: 8px;
+    background-color: #2a2a2a;
+}
+
+.game-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.3s ease;
 }
 
 .game-thumb-placeholder {

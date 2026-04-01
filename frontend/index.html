@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Y8.COM - Chơi Game Trực Tuyến Miễn Phí</title>
+    <title>Game36h - Chơi game trực tuyến miễn phí</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
@@ -22,7 +22,7 @@
 
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Tìm kiếm game...">
-                <button class="search-btn" onclick="searchGames()">
+                <button class="search-btn" onclick="performSearch()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"></circle>
                         <path d="m21 21-4.35-4.35"></path>
@@ -35,6 +35,9 @@
                 <a href="register.html" class="btn-register">Đăng ký</a>
             </div>
         </div>
+
+        <!-- Header Categories -->
+        <div class="header-categories" id="headerCategories"></div>
     </header>
 
     <!-- Main -->
@@ -46,24 +49,13 @@
             <p>Khám phá hàng ngàn game hấp dẫn!</p>
         </section>
 
-        <!-- Categories -->
-        <section class="categories-section">
-            <div class="section-header">
-                <h2>Thể Loại Game</h2>
-            </div>
-
-            <div class="categories-grid" id="categoriesContainer">
-                <!-- JS render -->
-            </div>
-        </section>
-
-        <!-- Games -->
+        <!-- Recent Games -->
         <section class="game-section">
             <div class="section-header">
-                <h2>Danh Sách Game</h2>
+                <h2>Game Vừa Có</h2>
             </div>
 
-            <div class="games-grid" id="gamesContainer">
+            <div class="games-grid" id="recentGamesContainer">
                 <!-- JS render -->
             </div>
         </section>
@@ -84,8 +76,9 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            loadHeaderCategories();
             loadCategories();
-            loadGames();
+            loadRecentGames();
             updateHeaderActions();
         });
 
@@ -94,192 +87,145 @@
             const headerActions = document.querySelector('.header-actions');
             if (!headerActions) return;
 
-  if (API.Auth.isLoggedIn()) {
-                const user = API.Auth.getCurrentUser();
+            if (window.API.Auth.isLoggedIn()) {
+                const user = window.API.Auth.getCurrentUser();
                 headerActions.innerHTML = `
                     <a href="profile.html" class="user-avatar-link">
                         <img src="${user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (user?.username || 'User')}" alt="Avatar" class="header-avatar">
                     </a>
                     <span class="username">${user?.username || 'User'}</span>
-                    <button class="btn-register" onclick="API.Auth.logout()">Đăng xuất</button>
+                    <button class="btn-register" onclick="window.API.Auth.logout()">Đăng xuất</button>
                 `;
             }
         }
 
-        // === XỬ LÝ TÌM KIẾM ===
-        const searchInput = document.getElementById("searchInput");
-        const searchBtn = document.querySelector(".search-btn");
-
+        // === SEARCH ===
         function performSearch() {
-            const keyword = searchInput.value.trim();
+            const keyword = document.getElementById("searchInput").value.trim();
             if (keyword) {
                 window.location.href = `search.html?q=${encodeURIComponent(keyword)}`;
             }
         }
 
-        // Click nút search
-        searchBtn.addEventListener("click", performSearch);
-
-        // Nhấn Enter trong ô input
-        searchInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                performSearch();
-            }
+        document.getElementById("searchInput").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") performSearch();
         });
+
+        // ================= HEADER CATEGORIES =================
+        async function loadHeaderCategories() {
+            try {
+                const categories = await window.API.Categories.getCategories();
+                const popular = (Array.isArray(categories) ? categories : []).slice(0, 5);
+                const header = document.getElementById('headerCategories');
+                if (!header) return;
+
+                if (popular.length === 0) {
+                    header.innerHTML = '<p style="padding: 8px 20px; color: #999;">Không có thể loại nào</p>';
+                    return;
+                }
+
+                header.innerHTML = popular.map(cat => `
+                    <button class="header-category-btn" onclick="loadGamesByCategory(${cat.id})">
+                        ${cat.name}
+                    </button>
+                `).join('');
+            } catch (err) {
+                console.error('Load header categories error:', err);
+            }
+        }
 
         // ================= CATEGORIES =================
         async function loadCategories() {
             try {
-                const categories = await API.Categories.getCategories();
+                const categories = await window.API.Categories.getCategories();
                 const container = document.getElementById("categoriesContainer");
+                if (!container) return;
 
-                container.innerHTML = "";
+                const catArray = Array.isArray(categories) ? categories : [];
+                if (catArray.length === 0) {
+                    container.innerHTML = '<p>Không có thể loại nào</p>';
+                    return;
+                }
 
-                categories.forEach(cat => {
-                    const el = document.createElement("div");
-                    el.className = "category-card";
-
-                    el.innerHTML = `
+                container.innerHTML = catArray.map(cat => `
+                    <div class="category-card" onclick="loadGamesByCategory(${cat.id})" style="cursor: pointer;">
                         <span class="category-icon">🎮</span>
                         <span class="category-name">${cat.name}</span>
-                    `;
-
-                    el.onclick = () => loadGamesByCategory(cat.id);
-
-                    container.appendChild(el);
-                });
-
+                    </div>
+                `).join('');
             } catch (err) {
-                console.error(err);
+                console.error('Load categories error:', err);
+                document.getElementById("categoriesContainer").innerHTML = '<p>Lỗi tải thể loại</p>';
             }
         }
 
-        // ================= GAMES =================
-        let userFavorites = new Set(); // Store favorite game IDs
-
-        async function loadUserFavorites() {
-            if (!API.Auth.isLoggedIn()) return;
+        // ================= RECENT GAMES =================
+        async function loadRecentGames() {
             try {
-                const user = API.Auth.getCurrentUser();
-                const result = await API.Favorites.getUserFavorites(user.id);
-                const favorites = result.content || result.data || [];
-                userFavorites = new Set(favorites.map(fav => fav.gameId || fav.game?.id));
+                const response = await window.API.Games.getGames({ page: 0, limit: 12 });
+                const games = response.content || response || [];
+                renderRecentGames(games);
             } catch (err) {
-                console.error('Error loading favorites:', err);
-            }
-        }
-
-        async function loadGames() {
-            // Load favorites first if logged in
-            await loadUserFavorites();
-            try {
-                const games = await API.Games.getGames();
-                renderGames(games);
-            } catch (err) {
-                console.error(err);
+                console.error('Load recent games error:', err);
+                document.getElementById("recentGamesContainer").innerHTML = '<p>Lỗi tải danh sách game</p>';
             }
         }
 
         async function loadGamesByCategory(categoryId) {
-            await loadUserFavorites();
             try {
-                const games = await API.Games.getGamesByCategory(categoryId);
-                renderGames(games);
+                const response = await window.API.Games.getGames({ category: categoryId, page: 0, limit: 12 });
+                const games = response.content || response || [];
+                renderRecentGames(games);
+                
+                // Scroll to top
+                document.querySelector('.game-section').scrollIntoView({ behavior: 'smooth' });
             } catch (err) {
-                console.error(err);
+                console.error('Load games by category error:', err);
             }
         }
 
-        function renderGames(games) {
-            const container = document.getElementById("gamesContainer");
-            container.innerHTML = "";
+        function renderRecentGames(games) {
+            const container = document.getElementById("recentGamesContainer");
+            if (!container) return;
 
-            // Handle Spring Page wrapper - extract content array
-            const gamesArray = games.content || games;
-
-            if (!gamesArray || gamesArray.length === 0) {
-                container.innerHTML = "<p>Không có game nào.</p>";
+            if (!Array.isArray(games) || games.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Không có game nào</p>';
                 return;
             }
 
-            gamesArray.forEach(game => {
-                const el = document.createElement("div");
-                el.className = "game-card";
-
-                const isFavorite = userFavorites.has(game.id);
-                
-                el.innerHTML = `
+            container.innerHTML = games.map(game => `
+                <div class="game-card" onclick="navigateToGame(${game.id})">
                     <div class="game-thumb">
-                        <img src="${game.thumbnail || 'https://via.placeholder.com/300'}" alt="${game.title}">
+                        <img src="${game.thumbnail || 'https://via.placeholder.com/300x200?text=' + encodeURIComponent(game.title)}" alt="${game.title}">
                         <div class="game-overlay">
-                            <button class="play-btn" onclick="playGame(${game.id})">Chơi ngay</button>
+                            <button class="play-btn" onclick="event.stopPropagation(); navigateToGame(${game.id})">Chơi ngay</button>
                         </div>
-                        ${API.Auth.isLoggedIn() ? `
-                            <button class="favorite-btn ${isFavorite ? 'active' : ''}" 
-                                    onclick="toggleFavorite(event, ${game.id}, this)"
-                                    data-game-id="${game.id}"
-                                    title="${isFavorite ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}">
-                                ❤️
-                            </button>
-                        ` : ''}
                     </div>
 
                     <div class="game-info">
                         <h3 class="game-title">${game.title}</h3>
                         <div class="game-meta">
                             <span>⭐ ${game.averageRating || 0}</span>
-                            <span>👁 ${game.views || 0}</span>
+                            <span>👁 ${formatNumber(game.views || 0)}</span>
                         </div>
                     </div>
-                `;
-
-                container.appendChild(el);
-            });
+                </div>
+            `).join('');
         }
 
-        async function playGame(gameId) {
-            // Add to history if logged in
-            if (API.Auth.isLoggedIn()) {
-                try {
-                    await API.History.addToHistory(gameId);
-                    console.log('Added to history');
-                } catch (err) {
-                    console.error('Failed to add history:', err);
-                }
-            }
-            
-            // Increment views
-            try {
-                await API.Games.incrementViews(gameId);
-            } catch (err) {
-                console.error('Failed to increment views:', err);
-            }
-            
+        // ================= NAVIGATION =================
+        function navigateToGame(gameId) {
             window.location.href = `game.html?id=${gameId}`;
         }
 
-        async function toggleFavorite(event, gameId, btn) {
-            event.stopPropagation();
-            if (!API.Auth.isLoggedIn()) {
-                alert('Vui lòng đăng nhập để thêm vào yêu thích');
-                return;
+        // ================= UTILITY =================
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
             }
-            try {
-                await API.Favorites.toggleFavorite(gameId);
-                // Toggle UI
-                btn.classList.toggle('active');
-                const isActive = btn.classList.contains('active');
-                btn.title = isActive ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích';
-                // Update cache
-                if (isActive) {
-                    userFavorites.add(gameId);
-                } else {
-                    userFavorites.delete(gameId);
-                }
-            } catch (err) {
-                console.error('Error toggling favorite:', err);
-                alert('Không thể thêm vào yêu thích');
-            }
+            return num.toString();
         }
     </script>
 
