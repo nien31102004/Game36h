@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hỗ Trợ & Phản Hồi - Game36h</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Support Page Specific Styles */
+        .support-container {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            border-radius: 20px;
+            padding: 50px;
+            margin-bottom: 40px;
+        }
+
+        .support-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .support-header h1 {
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .support-header p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Support Form */
+        .support-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            border-radius: 10px;
+            color: #ffffff;
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #4CAF50;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.2);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Success Message */
+        .alert {
+            padding: 18px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert-success {
+            background: rgba(76, 175, 80, 0.15);
+            border-left-color: #4CAF50;
+            color: #8BC34A;
+        }
+
+        .alert-error {
+            background: rgba(255, 107, 107, 0.15);
+            border-left-color: #ff6b6b;
+            color: #ff9393;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Info Cards */
+        .support-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 50px;
+            padding-top: 50px;
+            border-top: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            border-color: #4CAF50;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.2);
+        }
+
+        .info-icon {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .info-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .info-card p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .support-container {
+                padding: 30px 20px;
+            }
+
+            .support-header h1 {
+                font-size: 32px;
+            }
+
+            .support-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html">
+                    <span class="logo-y">Game</span>
+                    <span class="logo-8">36</span>
+                    <span class="logo-com">h</span>
+                </a>
+            </div>
+            <div class="search-box">
+                <input type="text" placeholder="Tìm kiếm game...">
+                <button class="search-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="header-actions logged-in" id="headerActions">
+                <div class="user-dropdown">
+                    <span class="username" id="username">Người dùng</span>
+                    <div class="dropdown-menu">
+                        <a href="profile.html">Thông tin cá nhân</a>
+                        <a href="support.html">Hỗ trợ</a>
+                        <hr>
+                        <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="support-container">
+            <div class="support-header">
+                <h1>🤝 Hỗ Trợ & Phản Hồi</h1>
+                <p>Chúng tôi luôn sẵn sàng lắng nghe ý kiến của bạn. Hãy gửi phản hồi để giúp chúng tôi cải thiện Game36h</p>
+            </div>
+
+            <!-- Alert Message -->
+            <div id="alertMessage"></div>
+
+            <!-- Support Form -->
+            <form class="support-form" id="supportForm">
+                <div class="form-group">
+                    <label for="fullName">Họ và tên *</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="Nhập họ và tên của bạn" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" placeholder="Nhập email của bạn" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="content">Nội dung phản hồi *</label>
+                    <textarea id="content" name="content" placeholder="Nhập nội dung phản hồi của bạn..." required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">Gửi Phản Hồi</button>
+            </form>
+
+            <!-- Info Cards -->
+            <div class="support-info">
+                <div class="info-card">
+                    <div class="info-icon">⚡</div>
+                    <h3>Phản Hồi Nhanh</h3>
+                    <p>Chúng tôi sẽ phản hồi trong vòng 24 giờ</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">🎯</div>
+                    <h3>Hỗ Trợ Chuyên Nghiệp</h3>
+                    <p>Đội ngũ support giàu kinh nghiệm sẵn sàng hỗ trợ</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">💬</div>
+                    <h3>Mọi Lúc Mọi Nơi</h3>
+                    <p>Liên lạc với chúng tôi bất kỳ lúc nào thuận tiện</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-logo">
+                    <span style="color: #4CAF50;">Game</span>
+                    <span>36</span>
+                    <span style="color: #4CAF50;">h</span>
+                </div>
+                <div class="footer-social">
+                    <a href="#" class="social-link">Facebook</a>
+                    <a href="#" class="social-link">Twitter</a>
+                    <a href="#" class="social-link">Discord</a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Về Game36h</h4>
+                    <ul>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="about.html">Giới thiệu</a></li>
+                        <li><a href="support.html">Hỗ trợ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Chính Sách</h4>
+                    <ul>
+                        <li><a href="terms.html">Điều khoản sử dụng</a></li>
+                        <li><a href="privacy.html">Chính sách bảo mật</a></li>
+                        <li><a href="contact.html">Liên hệ</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Game36h. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize user info
+        function initializeUser() {
+            const username = localStorage.getItem('username') || 'Người dùng';
+            document.getElementById('username').textContent = username;
+        }
+
+        // Show alert message
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alertMessage');
+            alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        // Form submit handler
+        document.getElementById('supportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const content = document.getElementById('content').value.trim();
+
+            if (!fullName || !email || !content) {
+                showAlert('Vui lòng điền đầy đủ thông tin!', 'error');
+                return;
+            }
+
+            // Simulate API call
+            console.log({
+                fullName,
+                email,
+                content,
+                timestamp: new Date().toISOString()
+            });
+
+            // Show success message
+            showAlert('✓ Phản hồi của bạn đã được gửi thành công! Cảm ơn bạn đã góp ý.', 'success');
+
+            // Reset form
+            this.reset();
+        });
+
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('username');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        });
+
+        // Initialize on page load
+        window.addEventListener('load', initializeUser);
+    </script>
+</body>
+</html>
