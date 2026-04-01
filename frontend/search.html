@@ -105,10 +105,41 @@
     </main>
 
     <!-- Footer -->
+<!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-logo">
+                    <span style="color: #4CAF50;">Game</span>
+                    <span>36</span>
+                    <span style="color: #4CAF50;">h</span>
+                </div>
+                <div class="footer-social">
+                    <a href="#" class="social-link">Facebook</a>
+                    <a href="#" class="social-link">Twitter</a>
+                    <a href="#" class="social-link">Discord</a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Về Game36h</h4>
+                    <ul>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="guide.html">Hướng dẫn</a></li>
+                        <li><a href="support.html">Hỗ trợ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Chính Sách</h4>
+                    <ul>
+                        <li><a href="terms.html">Điều khoản sử dụng</a></li>
+                        <li><a href="privacy.html">Chính sách bảo mật</a></li>
+                        <li><a href="contact.html">Liên hệ</a></li>
+                    </ul>
+                </div>
+            </div>
             <div class="footer-bottom">
-                <p>© 2024 Game36h - Chơi game trực tuyến miễn phí!</p>
+                <p>&copy; 2024 Game36h. Tất cả quyền được bảo lưu.</p>
             </div>
         </div>
     </footer>
@@ -120,14 +151,20 @@
             const headerActions = document.querySelector('.header-actions');
             if (!headerActions) return;
 
-            if (API.Auth.isLoggedIn()) {
-                const user = API.Auth.getCurrentUser();
+            if (window.API.Auth.isLoggedIn()) {
+                const user = window.API.Auth.getCurrentUser();
                 headerActions.innerHTML = `
-                    <a href="profile.html" class="user-avatar-link">
-                        <img src="${user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (user?.username || 'User')}" alt="Avatar" class="header-avatar">
-                    </a>
-                    <span class="username">${user?.username || 'User'}</span>
-                    <button class="btn-register" onclick="API.Auth.logout()">Đăng xuất</button>
+                    <div class="header-actions logged-in" id="headerActions">
+                        <div class="user-dropdown">
+                            <span class="username" id="username">Người dùng</span>
+                            <div class="dropdown-menu">
+                                <a href="profile.html">Thông tin cá nhân</a>
+                                <a href="support.html">Hỗ trợ</a>
+                                <hr>
+                                <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
+                            </div>
+                        </div>
+                    </div>
                 `;
             }
         }
