@@ -3,6 +3,7 @@ package com.example.game36h.controller;
 import com.example.game36h.dto.GameRequest;
 import com.example.game36h.dto.GameResponse;
 import com.example.game36h.service.GameService;
+import com.example.game36h.service.UserService;
 import com.example.game36h.security.UserPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public class GameController {
 
     @Autowired
     private GameService gameService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping
     public ResponseEntity<Page<GameResponse>> getGames(
@@ -77,7 +81,12 @@ public class GameController {
     }
 
     @PostMapping("/{id}/play")
-    public ResponseEntity<Void> incrementViews(@PathVariable Long id) {
+    public ResponseEntity<Void> startPlay(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        Long userId = getUserIdFromUserDetails(userDetails);
+        userService.startPlay(userId);
         gameService.incrementViews(id);
         return ResponseEntity.ok().build();
     }

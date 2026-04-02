@@ -1,5 +1,6 @@
 package com.example.game36h.controller;
 
+import com.example.game36h.dto.PlayStatusDto;
 import com.example.game36h.dto.UserDto;
 import com.example.game36h.service.UserService;
 import com.example.game36h.security.UserPrincipal;
@@ -61,6 +62,30 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me/play-status")
+    public ResponseEntity<PlayStatusDto> getPlayStatus(@AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getUserIdFromUserDetails(userDetails);
+        PlayStatusDto status = userService.getPlayStatus(userId);
+        return ResponseEntity.ok(status);
+    }
+
+    @PostMapping("/me/start-play")
+    public ResponseEntity<Void> startPlay(@AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getUserIdFromUserDetails(userDetails);
+        userService.startPlay(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/me/update-play-time")
+    public ResponseEntity<Void> updatePlayTime(
+            @RequestParam long minutesPlayed,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        Long userId = getUserIdFromUserDetails(userDetails);
+        userService.updatePlayTime(userId, minutesPlayed);
+        return ResponseEntity.ok().build();
     }
 
     private Long getUserIdFromUserDetails(UserDetails userDetails) {

@@ -35,6 +35,18 @@
         </div>
     </header>
 
+    <!-- Play Timer Widget -->
+    <div id="playTimerWidget" class="play-timer-widget" style="display: none;">
+        <div class="timer-content">
+            <div class="timer-icon">⏱️</div>
+            <div class="timer-text">
+                <div class="timer-label">Thời gian chơi hôm nay</div>
+                <div class="timer-value" id="playTimeDisplay">00:00</div>
+                <div class="timer-remaining" id="remainingTimeDisplay">Còn 180 phút</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Game Detail Content -->
     <main class="main-content">
         <div class="game-detail-container">
@@ -180,6 +192,7 @@
             if (gameId) {
                 loadGameDetail(gameId);
                 updateHeaderActions();
+                initPlayTimer();
             } else {
                 alert('Game không tìm thấy');
                 window.location.href = 'index.html';
@@ -215,10 +228,7 @@
                 // Setup play button
                 const bigPlayBtn = document.querySelector('.big-play-btn');
                 if (bigPlayBtn) {
-                    bigPlayBtn.onclick = () => {
-                        document.getElementById('gamePlaceholder').style.display = 'none';
-                        iframe.style.display = 'block';
-                    };
+                    bigPlayBtn.onclick = () => startPlaying(gameId);
                 }
 
                 // Setup favorite button
@@ -666,6 +676,142 @@
             }
             return num.toString();
         }
+
+        // ================= PLAY TIMER =================
+        let playTimerInterval = null;
+        let playStartTime = null;
+        let currentPlayTime = 0;
+
+        async function initPlayTimer() {
+            if (!window.API.Auth.isLoggedIn()) {
+                return;
+            }
+
+            try {
+                const status = await window.API.UserGames.getPlayStatus();
+                updateTimerDisplay(status);
+                
+                if (status.isLocked) {
+                    disablePlayButton(status.message);
+                }
+            } catch (err) {
+                console.error('Error loading play status:', err);
+            }
+        }
+
+        async function startPlaying(gameId) {
+            if (!window.API.Auth.isLoggedIn()) {
+                window.location.href = `login.html?redirect=game.html?id=${gameId}`;
+                return;
+            }
+
+            try {
+                // Check play status first
+                const status = await window.API.UserGames.getPlayStatus();
+                if (status.isLocked || status.playTimeToday >= 180) {
+                    alert(status.message || 'Bạn đã chơi quá 180 phút, bạn hãy đợi 2 tiếng nữa để được chơi tiếp');
+                    disablePlayButton(status.message);
+                    return;
+                }
+
+                // Start play
+                await window.API.UserGames.startPlay(gameId);
+                
+                // Show game
+                document.getElementById('gamePlaceholder').style.display = 'none';
+                document.getElementById('gameIframe').style.display = 'block';
+                
+                // Start timer
+                playStartTime = Date.now();
+                currentPlayTime = status.playTimeToday;
+                startPlayTimer();
+                
+                // Show timer widget
+                document.getElementById('playTimerWidget').style.display = 'block';
+                
+            } catch (err) {
+                console.error('Error starting play:', err);
+                alert('Không thể bắt đầu chơi game. Vui lòng thử lại.');
+            }
+        }
+
+        function startPlayTimer() {
+            if (playTimerInterval) {
+                clearInterval(playTimerInterval);
+            }
+            
+            playTimerInterval = setInterval(async () => {
+                const elapsedMinutes = Math.floor((Date.now() - playStartTime) / 60000);
+                const totalMinutes = currentPlayTime + elapsedMinutes;
+                
+                updateTimerDisplayValue(totalMinutes);
+                
+                // Update backend every 5 minutes
+                if (elapsedMinutes > 0 && elapsedMinutes % 5 === 0) {
+                    try {
+                        await window.API.UserGames.updatePlayTime(elapsedMinutes);
+                        // Refresh status
+                        const status = await window.API.UserGames.getPlayStatus();
+                        if (status.isLocked) {
+                            stopPlayTimer();
+                            disablePlayButton(status.message);
+                            alert(status.message);
+                        }
+                    } catch (err) {
+                        console.error('Error updating play time:', err);
+                    }
+                }
+                
+                // Check if reached limit
+                if (totalMinutes >= 180) {
+                    stopPlayTimer();
+                    disablePlayButton('Bạn đã chơi quá 180 phút, bạn hãy đợi 2 tiếng nữa để được chơi tiếp');
+                    alert('Bạn đã chơi quá 180 phút, bạn hãy đợi 2 tiếng nữa để được chơi tiếp');
+                }
+            }, 1000); // Update every second
+        }
+
+        function stopPlayTimer() {
+            if (playTimerInterval) {
+                clearInterval(playTimerInterval);
+                playTimerInterval = null;
+            }
+        }
+
+        function updateTimerDisplay(status) {
+            currentPlayTime = status.playTimeToday || 0;
+            updateTimerDisplayValue(currentPlayTime);
+            
+            if (!status.isLocked && currentPlayTime < 180) {
+                document.getElementById('playTimerWidget').style.display = 'block';
+            }
+        }
+
+        function updateTimerDisplayValue(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            document.getElementById('playTimeDisplay').textContent = 
+                `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+            
+            const remaining = Math.max(0, 180 - minutes);
+            document.getElementById('remainingTimeDisplay').textContent = `Còn ${remaining} phút`;
+        }
+
+        function disablePlayButton(message) {
+            const bigPlayBtn = document.querySelector('.big-play-btn');
+            if (bigPlayBtn) {
+                bigPlayBtn.disabled = true;
+                bigPlayBtn.style.opacity = '0.5';
+                bigPlayBtn.style.cursor = 'not-allowed';
+                bigPlayBtn.textContent = 'KHÔNG THỂ CHƠI';
+                bigPlayBtn.title = message;
+            }
+        }
+
+        // Stop timer when page unloads
+        window.addEventListener('beforeunload', () => {
+            stopPlayTimer();
+        });
     </script>
 </body>
 </html>

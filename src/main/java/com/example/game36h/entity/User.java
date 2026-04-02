@@ -33,13 +33,20 @@ public class User {
 
     private String avatar;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "play_time_today", nullable = false)
+    private Long playTimeToday = 0L; // in minutes
+
+    @Column(name = "last_play_date")
+    private LocalDateTime lastPlayDate;
+
+    @Column(name = "is_locked", nullable = false)
+    private Boolean isLocked = false;
+
+    @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
+    @Column(name = "lock_until")
+    private LocalDateTime lockUntil;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Game> games;
@@ -105,4 +112,16 @@ public class User {
     
     public List<Notification> getNotifications() { return notifications; }
     public void setNotifications(List<Notification> notifications) { this.notifications = notifications; }
+    
+    public Long getPlayTimeToday() { return playTimeToday; }
+    public void setPlayTimeToday(Long playTimeToday) { this.playTimeToday = playTimeToday; }
+    
+    public LocalDateTime getLastPlayDate() { return lastPlayDate; }
+    public void setLastPlayDate(LocalDateTime lastPlayDate) { this.lastPlayDate = lastPlayDate; }
+    
+    public Boolean getIsLocked() { return isLocked; }
+    public void setIsLocked(Boolean isLocked) { this.isLocked = isLocked; }
+    
+    public LocalDateTime getLockUntil() { return lockUntil; }
+    public void setLockUntil(LocalDateTime lockUntil) { this.lockUntil = lockUntil; }
 }

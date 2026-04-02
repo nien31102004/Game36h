@@ -402,6 +402,24 @@ const UserGamesAPI = {
     async toggleGameStatus(gameId, isActive) {
         const token = AuthAPI.getToken();
         return apiCall(`/games/${gameId}/status`, 'PUT', { is_active: isActive }, token);
+    },
+
+    // Lấy trạng thái chơi game
+    async getPlayStatus() {
+        const token = AuthAPI.getToken();
+        return apiCall('/users/me/play-status', 'GET', null, token);
+    },
+
+    // Bắt đầu chơi game
+    async startPlay(gameId) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/games/${gameId}/play`, 'POST', null, token);
+    },
+
+    // Cập nhật thời gian chơi
+    async updatePlayTime(minutesPlayed) {
+        const token = AuthAPI.getToken();
+        return apiCall(`/users/me/update-play-time?minutesPlayed=${minutesPlayed}`, 'POST', null, token);
     }
 };
 

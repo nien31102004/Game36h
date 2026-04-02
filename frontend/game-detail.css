@@ -4,6 +4,52 @@
     margin: 0 auto;
 }
 
+/* Play Timer Widget */
+.play-timer-widget {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid rgba(76, 175, 80, 0.3);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    min-width: 200px;
+}
+
+.timer-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.timer-icon {
+    font-size: 24px;
+}
+
+.timer-text {
+    color: #ffffff;
+}
+
+.timer-label {
+    font-size: 12px;
+    color: #cccccc;
+    margin-bottom: 5px;
+}
+
+.timer-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #4CAF50;
+    margin-bottom: 2px;
+}
+
+.timer-remaining {
+    font-size: 11px;
+    color: #ff9800;
+}
+
 /* Game Player Section */
 .game-player-section {
     margin-bottom: 30px;
