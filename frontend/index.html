@@ -129,21 +129,38 @@
 
             if (window.API.Auth.isLoggedIn()) {
                 const user = window.API.Auth.getCurrentUser();
+                const adminBtn = user?.role === 'ADMIN' ? '<a href="admin/admin.html" class="btn-register">⚙️ Admin Dashboard</a>' : '';    
                 headerActions.innerHTML = `
                     <div class="header-actions logged-in" id="headerActions">
+                        ${adminBtn}
                         <div class="user-dropdown">
                             <span class="username" id="username">Người dùng</span>
                             <div class="dropdown-menu">
                                 <a href="profile.html">Thông tin cá nhân</a>
                                 <a href="support.html">Hỗ trợ</a>
-                                <hr>
-                                <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
                             </div>
                         </div>
                     </div>
                 `;
             }
         }
+        // function updateHeaderActions() {
+        //     const headerActions = document.querySelector('.header-actions');
+        //     if (!headerActions) return;
+
+        //     if (window.API.Auth.isLoggedIn()) {
+        //         const user = window.API.Auth.getCurrentUser();
+        //         const adminBtn = user?.role === 'ADMIN' ? '<a href="admin/admin.html" class="btn-register">⚙️ Admin Dashboard</a>' : '';
+        //         headerActions.innerHTML = `
+        //             <a href="profile.html" class="user-avatar-link">
+        //                 <img src="${user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (user?.username || 'User')}" alt="Avatar" class="header-avatar">
+        //             </a>
+        //             <span class="username">${user?.username || 'User'}</span>
+        //             ${adminBtn}
+        //             <button class="btn-register" onclick="window.API.Auth.logout()">Đăng xuất</button>
+        //         `;
+        //     }
+        // }
 
         // === SEARCH ===
         function performSearch() {

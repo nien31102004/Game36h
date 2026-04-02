@@ -120,7 +120,7 @@ public class GameService {
                 .map(this::convertToGameResponse);
     }
 
-    private GameResponse convertToGameResponse(Game game) {
+    public GameResponse convertToGameResponse(Game game) {
         GameResponse response = new GameResponse();
         response.setId(game.getId());
         response.setTitle(game.getTitle());

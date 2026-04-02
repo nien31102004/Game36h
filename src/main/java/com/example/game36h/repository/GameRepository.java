@@ -41,4 +41,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
         )
         """)
     Page<Game> findRecommendedGames(@Param("userId") Long userId, Pageable pageable);
+    
+    @Query("SELECT COUNT(g) FROM Game g WHERE g.status = :status")
+    long countByStatus(@Param("status") Game.GameStatus status);
 }

@@ -17,7 +17,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private boolean isBanned = false;
     @Column(unique = true, nullable = false)
     private String username;
 
@@ -66,6 +66,9 @@ public class User {
     // Manual getters and setters (Lombok not working)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    
+    public Boolean getIsBanned() { return isBanned; }
+    public void setIsBanned(Boolean isBanned) { this.isBanned = isBanned; }
     
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }

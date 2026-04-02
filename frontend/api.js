@@ -463,6 +463,89 @@ const NotificationsAPI = {
     }
 };
 
+const AdminAPI = {
+    // DASHBOARD
+    getDashboard() {
+        return apiCall('/admin/dashboard', 'GET', null, AuthAPI.getToken());
+    },
+
+    // CATEGORIES CRUD  
+    getCategories() {
+        return apiCall('/categories', 'GET', null, AuthAPI.getToken());
+    },
+
+    createCategory(data) {
+        return apiCall('/categories', 'POST', data, AuthAPI.getToken());
+    },
+
+    updateCategory(id, data) {
+        return apiCall(`/categories/${id}`, 'PUT', data, AuthAPI.getToken());
+    },
+
+    deleteCategory(id) {
+        return apiCall(`/categories/${id}`, 'DELETE', null, AuthAPI.getToken());
+    },
+
+    // GAMES APPROVAL
+    getPendingGames(page = 0, size = 10) {
+        return apiCall(`/admin/games/pending?page=${page}&size=${size}`, 'GET', null, AuthAPI.getToken());
+    },
+
+    approveGame(id) {
+        return apiCall(`/admin/games/${id}/approve`, 'PUT', null, AuthAPI.getToken());
+    },
+
+    rejectGame(id) {
+        return apiCall(`/admin/games/${id}/reject`, 'PUT', null, AuthAPI.getToken());
+    },
+
+    updateGameStatus(id, status) {
+        return apiCall(`/admin/games/${id}/status?status=${status}`, 'PUT', null, AuthAPI.getToken());
+    },
+
+    // GAMES MANAGEMENT
+    getAllGames(page = 0, size = 10) {
+        return apiCall(`/admin/games?page=${page}&size=${size}`, 'GET', null, AuthAPI.getToken());
+    },
+
+    createGame(data) {
+        return apiCall('/games', 'POST', data, AuthAPI.getToken());
+    },
+
+    updateGame(id, data) {
+        return apiCall(`/games/${id}`, 'PUT', data, AuthAPI.getToken());
+    },
+
+    deleteGame(id) {
+        return apiCall(`/games/${id}`, 'DELETE', null, AuthAPI.getToken());
+    },
+
+    // USERS MANAGEMENT
+    getUsers(page = 0, size = 10) {
+        return apiCall(`/admin/users?page=${page}&size=${size}`, 'GET', null, AuthAPI.getToken());
+    },
+
+    searchUsers(keyword) {
+        return apiCall(`/admin/users/search?keyword=${keyword}`, 'GET', null, AuthAPI.getToken());
+    },
+
+    updateUser(id, data) {
+        return apiCall(`/admin/users/${id}`, 'PUT', data, AuthAPI.getToken());
+    },
+
+    changeUserRole(id, role) {
+        return apiCall(`/admin/users/${id}/role?role=${role}`, 'PUT', null, AuthAPI.getToken());
+    },
+
+    banUser(id) {
+        return apiCall(`/admin/users/${id}/ban`, 'PUT', null, AuthAPI.getToken());
+    },
+
+    deleteUser(id) {
+        return apiCall(`/admin/users/${id}`, 'DELETE', null, AuthAPI.getToken());
+    }
+};
+
 // Export các API modules
 window.API = {
     Auth: AuthAPI,
@@ -474,6 +557,7 @@ window.API = {
     Categories: CategoriesAPI,
     Notifications: NotificationsAPI,
     UserGames: UserGamesAPI,
+    Admin: AdminAPI,
     baseUrl: API_BASE_URL
 };
 

@@ -520,15 +520,15 @@
 
             if (window.API.Auth.isLoggedIn()) {
                 const user = window.API.Auth.getCurrentUser();
+                const adminBtn = user?.role === 'ADMIN' ? '<a href="admin/admin.html" class="btn-register">⚙️ Admin Dashboard</a>' : '';
                 headerActions.innerHTML = `
                     <div class="header-actions logged-in" id="headerActions">
+                        ${adminBtn}
                         <div class="user-dropdown">
                             <span class="username" id="username">Người dùng</span>
                             <div class="dropdown-menu">
                                 <a href="profile.html">Thông tin cá nhân</a>
                                 <a href="support.html">Hỗ trợ</a>
-                                <hr>
-                                <a href="#" class="logout" id="logoutBtn">Đăng xuất</a>
                             </div>
                         </div>
                     </div>
