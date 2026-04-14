@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -62,9 +63,11 @@ public DaoAuthenticationProvider authenticationProvider() {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/games/**").permitAll()
                 .requestMatchers("/api/categories/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/forum/**").permitAll()
                 .requestMatchers("/api/favorites/user/**").permitAll()
                 .requestMatchers("/api/history/user/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/forum/**").authenticated()
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())

@@ -564,6 +564,70 @@ const AdminAPI = {
     }
 };
 
+const ForumAPI = {
+    getPosts({ search = '', title = '', sort = 'newest' } = {}) {
+        const query = new URLSearchParams();
+        if (search) query.set('search', search);
+        if (title) query.set('title', title);
+        if (sort) query.set('sort', sort);
+        return apiCall(`/forum/posts?${query.toString()}`, 'GET', null, AuthAPI.getToken());
+    },
+    getPost(id) {
+        return apiCall(`/forum/posts/${id}`, 'GET', null, AuthAPI.getToken());
+    },
+    createPost(data) {
+        return apiCall('/forum/posts', 'POST', data, AuthAPI.getToken());
+    },
+    updatePost(id, data) {
+        return apiCall(`/forum/posts/${id}`, 'PUT', data, AuthAPI.getToken());
+    },
+    deletePost(id) {
+        return apiCall(`/forum/posts/${id}`, 'DELETE', null, AuthAPI.getToken());
+    },
+    likePost(id) {
+        return apiCall(`/forum/posts/${id}/like`, 'POST', null, AuthAPI.getToken());
+    },
+    dislikePost(id) {
+        return apiCall(`/forum/posts/${id}/dislike`, 'POST', null, AuthAPI.getToken());
+    },
+    reportPost(id) {
+        return apiCall(`/forum/posts/${id}/report`, 'POST', null, AuthAPI.getToken());
+    },
+    addComment(postId, data) {
+        return apiCall(`/forum/posts/${postId}/comments`, 'POST', data, AuthAPI.getToken());
+    },
+    replyComment(postId, commentId, data) {
+        return apiCall(`/forum/posts/${postId}/comments/${commentId}/reply`, 'POST', data, AuthAPI.getToken());
+    },
+    updateComment(postId, commentId, data) {
+        return apiCall(`/forum/posts/${postId}/comments/${commentId}`, 'PUT', data, AuthAPI.getToken());
+    },
+    deleteComment(postId, commentId) {
+        return apiCall(`/forum/posts/${postId}/comments/${commentId}`, 'DELETE', null, AuthAPI.getToken());
+    },
+    likeComment(postId, commentId) {
+        return apiCall(`/forum/posts/${postId}/comments/${commentId}/like`, 'POST', null, AuthAPI.getToken());
+    },
+    dislikeComment(postId, commentId) {
+        return apiCall(`/forum/posts/${postId}/comments/${commentId}/dislike`, 'POST', null, AuthAPI.getToken());
+    },
+    reportComment(postId, commentId) {
+        return apiCall(`/forum/posts/${postId}/comments/${commentId}/report`, 'POST', null, AuthAPI.getToken());
+    },
+    getAdminReports() {
+        return apiCall('/admin/forum/reports', 'GET', null, AuthAPI.getToken());
+    },
+    resolvePostReport(id) {
+        return apiCall(`/admin/forum/posts/${id}/resolve`, 'PUT', null, AuthAPI.getToken());
+    },
+    resolveCommentReport(id) {
+        return apiCall(`/admin/forum/comments/${id}/resolve`, 'PUT', null, AuthAPI.getToken());
+    },
+    deleteReportedComment(id) {
+        return apiCall(`/admin/forum/comments/${id}`, 'DELETE', null, AuthAPI.getToken());
+    }
+};
+
 // Export các API modules
 window.API = {
     Auth: AuthAPI,
@@ -576,6 +640,7 @@ window.API = {
     Notifications: NotificationsAPI,
     UserGames: UserGamesAPI,
     Admin: AdminAPI,
+    Forum: ForumAPI,
     baseUrl: API_BASE_URL
 };
 

@@ -1,0 +1,155 @@
+package com.example.game36h.controller;
+
+import com.example.game36h.dto.ForumCommentRequest;
+import com.example.game36h.dto.ForumPostRequest;
+import com.example.game36h.dto.ForumPostResponse;
+import com.example.game36h.dto.ForumCommentResponse;
+import com.example.game36h.service.ForumService;
+import com.example.game36h.security.UserPrincipal;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/forum")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
+public class ForumController {
+
+    @Autowired
+    private ForumService forumService;
+
+    @GetMapping("/posts")
+    public ResponseEntity<List<ForumPostResponse>> getPosts(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String title,
+            @RequestParam(defaultValue = "newest") String sort) {
+        return ResponseEntity.ok(forumService.getPosts(search, title, sort));
+    }
+
+    @GetMapping("/posts/{id}")
+    public ResponseEntity<ForumPostResponse> getPost(@PathVariable Long id) {
+        return ResponseEntity.ok(forumService.getPostById(id));
+    }
+
+    @PostMapping("/posts")
+    public ResponseEntity<ForumPostResponse> createPost(
+            @Valid @RequestBody ForumPostRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getUserId(userDetails);
+        return ResponseEntity.ok(forumService.createPost(request, userId));
+    }
+
+    @PutMapping("/posts/{id}")
+    public ResponseEntity<ForumPostResponse> updatePost(
+            @PathVariable Long id,
+            @Valid @RequestBody ForumPostRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getUserId(userDetails);
+        boolean admin = isAdmin(userDetails);
+        return ResponseEntity.ok(forumService.updatePost(id, request, userId, admin));
+    }
+
+    @DeleteMapping("/posts/{id}")
+    public ResponseEntity<Void> deletePost(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getUserId(userDetails);
+        boolean admin = isAdmin(userDetails);
+        forumService.deletePost(id, userId, admin);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/posts/{id}/like")
+    public ResponseEntity<ForumPostResponse> likePost(@PathVariable Long id) {
+        return ResponseEntity.ok(forumService.likePost(id));
+    }
+
+    @PostMapping("/posts/{id}/dislike")
+    public ResponseEntity<ForumPostResponse> dislikePost(@PathVariable Long id) {
+        return ResponseEntity.ok(forumService.dislikePost(id));
+    }
+
+    @PostMapping("/posts/{id}/report")
+    public ResponseEntity<ForumPostResponse> reportPost(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getUserId(userDetails);
+        return ResponseEntity.ok(forumService.reportPost(id, userId));
+    }
+
+    @PostMapping("/posts/{postId}/comments")
+    public ResponseEntity<ForumCommentResponse> addComment(
+            @PathVariable Long postId,
+            @Valid @RequestBody ForumCommentRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getUserId(userDetails);
+        return ResponseEntity.ok(forumService.addComment(postId, request, userId));
+    }
+
+    @PostMapping("/posts/{postId}/comments/{commentId}/reply")
+    public ResponseEntity<ForumCommentResponse> replyComment(
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            @Valid @RequestBody ForumCommentRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getUserId(userDetails);
+        return ResponseEntity.ok(forumService.replyToComment(postId, commentId, request, userId));
+    }
+
+    @PutMapping("/posts/{postId}/comments/{commentId}")
+    public ResponseEntity<ForumCommentResponse> updateComment(
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            @Valid @RequestBody ForumCommentRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getUserId(userDetails);
+        boolean admin = isAdmin(userDetails);
+        return ResponseEntity.ok(forumService.updateComment(commentId, request, userId, admin));
+    }
+
+    @DeleteMapping("/posts/{postId}/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getUserId(userDetails);
+        boolean admin = isAdmin(userDetails);
+        forumService.deleteComment(commentId, userId, admin);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/posts/{postId}/comments/{commentId}/like")
+    public ResponseEntity<ForumCommentResponse> likeComment(@PathVariable Long commentId) {
+        return ResponseEntity.ok(forumService.likeComment(commentId));
+    }
+
+    @PostMapping("/posts/{postId}/comments/{commentId}/dislike")
+    public ResponseEntity<ForumCommentResponse> dislikeComment(@PathVariable Long commentId) {
+        return ResponseEntity.ok(forumService.dislikeComment(commentId));
+    }
+
+    @PostMapping("/posts/{postId}/comments/{commentId}/report")
+    public ResponseEntity<ForumCommentResponse> reportComment(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getUserId(userDetails);
+        return ResponseEntity.ok(forumService.reportComment(commentId, userId));
+    }
+
+    private Long getUserId(UserDetails userDetails) {
+        if (userDetails instanceof UserPrincipal) {
+            return ((UserPrincipal) userDetails).getId();
+        }
+        throw new RuntimeException("Invalid user details");
+    }
+
+    private boolean isAdmin(UserDetails userDetails) {
+        return userDetails.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+    }
+}
